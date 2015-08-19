@@ -1,5 +1,12 @@
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+/*
+ * bitfunc.h
+ *
+ *  Created on: Aug 19, 2015
+ *      Author: max
+ */
+
+#ifndef SRC_BITFUNC_H_
+#define SRC_BITFUNC_H_
 
 #include <assert.h>
 
@@ -42,5 +49,4 @@ extern int pop_lsb(bitboard &bb) {
     return idx;
 }
 
-
-#endif // ifndef MISC_H_INCLUDED
+#endif /* SRC_BITFUNC_H_ */

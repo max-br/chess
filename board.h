@@ -54,8 +54,8 @@ public:
 	void checkEnPassant(const square& from, const square& to, const Piece& piece, const Color& color);
 	void checkLegalCastles(const Piece& color);
 
+	bool isInCheck(const Color& color);
 
-	void updateCastlingRights(const Move& move, const Color& color);
 
 	void makeCastleMove(const Move& move, Moverecord& record);
 	void makePromotionMove(const Move& move, Moverecord& record);
@@ -67,6 +67,8 @@ public:
 	void unmakePromotionMove(const Moverecord& lastmove);
 	void unmakeMove();
 
+
+	void updateCastlingRights(const Move& move, const Color& color);
 	void switchColor();
 	void setupFEN(const std::string fen);
 	void resetBoard();

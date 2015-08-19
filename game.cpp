@@ -7,10 +7,11 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "board.h"
 #include "movegen.h"
 #include "evaluate.h"
-#include "misc.h"
 #include "search.h"
+
 #include "types.h"
 
 using namespace std;
@@ -22,11 +23,11 @@ uint64_t perft(Board& board, Movegen& movegen,int depth)
 
     if (depth == 0) return 1;
 
-    movegen.genAllMoves(board,movelist);
+    movegen.genAllMoves(movelist);
 
     for (int i = 0; i < movelist.count; i++) {
     	board.makeMove(movelist.moves[i]);
-    	if(!movegen.isInCheck(board,board.them)){
+    	if(!movegen.isInCheck(board.them)){
     		nodes += perft(board,movegen,depth - 1);
     	}
         board.unmakeMove();
@@ -45,18 +46,17 @@ uint64_t timePerft(Board& board, Movegen& movegen, int depth)
 	return nodes;
 }
 
-
 vector<string> divide(Board& board, Movegen& movegen,int depth)
 {
     Movelist movelist;
     vector<string> ret;
-    movegen.genAllMoves(board,movelist);
+    movegen.genAllMoves(movelist);
     int perft_cnt = 0;
 
     for (int i = 0; i < movelist.count; i++) {
     	string movestring;
     	board.makeMove(movelist.moves[i]);
-    	if(!movegen.isInCheck(board,board.them)){
+    	if(!movegen.isInCheck(board.them)){
     		int perft_tmp = perft(board,movegen,depth - 1);
     		perft_cnt += perft_tmp;
 
@@ -87,7 +87,7 @@ vector<string> divideInput()
 void runTests()
 {
 	Board board;
-	Movegen movegen;
+	Movegen movegen = Movegen(&board);
 	cout << "Running tests" << endl;
 
 
@@ -181,11 +181,11 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
         return eval.evaluatePos(board);
     }
 
-    movegen.genAllMoves(board,list);
+    movegen.genAllMoves(list);
     int val = 0;
     for (int i = 0; i < list.count;++i)  {
     	board.makeMove(list.moves[i]);
-    	if(!movegen.isInCheck(board,board.them)){
+    	if(!movegen.isInCheck(board.them)){
             val = -alphaBeta(board,movegen,eval,depth - 1, -beta, -alpha, &line);
     	}
     	board.unmakeMove();
@@ -304,7 +304,7 @@ int main()
 	Board board;
 	Evaluate eval;
 	Movelist list;
-	Movegen movegen;
+	Movegen movegen = Movegen(&board);
 
 	runTests();
 

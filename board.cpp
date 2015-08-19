@@ -73,6 +73,16 @@ void Board::checkEnPassant(const square& from, const square& to, const Piece& pi
 	}
 }
 
+bitboard Board::isAttacked(const Color& color, const square& sq){
+
+}
+
+bool Board::isInCheck(const Color& color){
+	assert(getKings(color));
+	square king_sq = bitScanForward(getKings(color));
+	return isAttacked(color,king_sq);
+}
+
 // must be called at the end of makemove, so changes to the rook position are already done
 void Board::updateCastlingRights(const Move& move, const Color& color)
 {

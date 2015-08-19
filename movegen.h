@@ -5,26 +5,21 @@
 #include <stdint.h>
 
 #include "types.h"
-#include "board.h"
 #include "magicmoves.h"
 
-extern int popCount(bitboard bb);
-extern int bitScanForward(bitboard bb);
-extern int pop_lsb(bitboard &bb);
-
 extern "C" void initmagicmoves();
-
 
 class Movegen
 {
 public:
+	Board* board;
 	bitboard king_moves[64];
 	bitboard knight_moves[64];
 	bitboard between[64][64];
 
 	bitboard pinned_pieces;
 
-	Movegen();
+	Movegen(Board* board);
 
 	void initAttackTable();
 	void initBetweenTable();
@@ -35,30 +30,30 @@ public:
 	inline Move encodeMove(const square& from, const square& to,
 			const Piece& piece, const Piece& capture, const Piece& promotion, const square& EP, const Movetype& type);
 
-	void genAllMoves(const Board& board, Movelist& list);
+	void genAllMoves(Movelist& list);
 
-	void genCastles(const Board& board, Movelist& list);
-	void genEvades(const Board& board, Movelist& list, const Color& color);
-	void genPromotion(const Board& board, Movelist& list,const square& from, const square& to);
+	void genCastles(Movelist& list);
+	void genEvades(Movelist& list, const Color& color);
+	void genPromotion(Movelist& list,const square& from, const square& to);
 
 
-	void genWhitePawnMoves(const Board& board, Movelist& list);
-	void genBlackPawnMoves(const Board& board, Movelist& list);
-	void genBishopMoves(const Board& board, Movelist& list);
-	void genKingMoves(const Board& board, Movelist& list);
-	void genKnightMoves(const Board& board, Movelist& list);
-	void genRookMoves(const Board& board, Movelist& list);
-	void genQueenMoves(const Board& board, Movelist& list);
+	void genWhitePawnMoves(Movelist& list);
+	void genBlackPawnMoves(Movelist& list);
+	void genBishopMoves(Movelist& list);
+	void genKingMoves(Movelist& list);
+	void genKnightMoves(Movelist& list);
+	void genRookMoves(Movelist& list);
+	void genQueenMoves(Movelist& list);
 
-	bool isAttacked(const Board& board, const Color& color, const square& sq);
-	bool isInCheck(const Board& board, const Color& color);
+	bool isAttacked(const Color& color, const square& sq);
+	bool isInCheck(const Color& color);
 
-	bitboard pinnedPieces(const Board& board, const Color& color);
+	bitboard pinnedPieces(const Color& color);
 
-	bitboard getAttackers(const Board& board, const Color& color, const square& sq);
+	bitboard getAttackers(const Color& color, const square& sq);
 	bitboard getInterposingSquares(square from,square to);
-	bitboard getMovers(const Board& board, const Color& color, const square& sq);
-	bitboard getPawnMovers(const Board& board, const Color& color, const square& sq);
+	bitboard getMovers(const Color& color, const square& sq);
+	bitboard getPawnMovers(const Color& color, const square& sq);
 
 };
 

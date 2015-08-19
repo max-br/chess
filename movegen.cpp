@@ -2,12 +2,16 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include "bitfunc.h"
+#include "board.h"
 #include "movegen.h"
 #include "directions.h"
 
 // ctor
-Movegen::Movegen()
+Movegen::Movegen(Board* board)
 {
+	this->board = board;
+
 	initmagicmoves();
 	initBetweenTable();
 	for(square i = 0; i != 64; ++i){
@@ -121,131 +125,131 @@ bool searchNullMoves(const Movelist& list){
 }
 
 
-void Movegen::genAllMoves(const Board& board, Movelist& list)
+void Movegen::genAllMoves(Movelist& list)
 {
-	pinned_pieces = pinnedPieces(board,board.us);
-	if(!isInCheck(board,board.us)){
-		if(board.us == WHITE){
-			genWhitePawnMoves(board,list);
+	pinned_pieces = pinnedPieces(board->us);
+	if(!isInCheck(board->us)){
+		if(board->us == WHITE){
+			genWhitePawnMoves(list);
 		}else{
-			genBlackPawnMoves(board,list);
+			genBlackPawnMoves(list);
 		}
-		genBishopMoves(board,list);
-		genKnightMoves(board,list);
-		genRookMoves(board,list);
-		genQueenMoves(board,list);
-		genKingMoves(board,list);
-		genCastles(board,list);
+		genBishopMoves(list);
+		genKnightMoves(list);
+		genRookMoves(list);
+		genQueenMoves(list);
+		genKingMoves(list);
+		genCastles(list);
 		//add en passants
 		for(int i = 0; i != 2; ++i){
-			if(board.en_passant[i] != NULLMOVE){
-				list.moves[list.count++] = board.en_passant[i];
+			if(board->en_passant[i] != NULLMOVE){
+				list.moves[list.count++] = board->en_passant[i];
 			}
 		}
 	}else{
-		genEvades(board,list,board.us);
+		genEvades(list,board->us);
 	}
 }
 
-void Movegen::genCastles(const Board& board, Movelist& list){
-	if(board.us == WHITE){
-		if(board.castling_rights[WKINGSIDE]){
-			if(board.squares[5] == EMPTY && board.squares[6] == EMPTY){
-				if(!isAttacked(board,board.us,5) && !isAttacked(board,board.us,6)){
-					list.moves[list.count++] = board.castle_moves[WKINGSIDE];
+void Movegen::genCastles(Movelist& list){
+	if(board->us == WHITE){
+		if(board->castling_rights[WKINGSIDE]){
+			if(board->squares[5] == EMPTY && board->squares[6] == EMPTY){
+				if(!isAttacked(board->us,5) && !isAttacked(board->us,6)){
+					list.moves[list.count++] = board->castle_moves[WKINGSIDE];
 				}
 			}
 		}
-		if(board.castling_rights[WQUEENSIDE]){
-			if(board.squares[1] == EMPTY && board.squares[2] == EMPTY && board.squares[3] == EMPTY){
-				if(!isAttacked(board,board.us,2) && !isAttacked(board,board.us,3)){
-					list.moves[list.count++] = board.castle_moves[WQUEENSIDE];
+		if(board->castling_rights[WQUEENSIDE]){
+			if(board->squares[1] == EMPTY && board->squares[2] == EMPTY && board->squares[3] == EMPTY){
+				if(!isAttacked(board->us,2) && !isAttacked(board->us,3)){
+					list.moves[list.count++] = board->castle_moves[WQUEENSIDE];
 				}
 			}
 		}
 	}
-	if(board.us == BLACK){
-		if(board.castling_rights[BKINGSIDE]){
-			if(board.squares[61] == EMPTY && board.squares[62] == EMPTY){
-				if(!isAttacked(board,board.us,61) && !isAttacked(board,board.us,62)){
-					list.moves[list.count++] = board.castle_moves[BKINGSIDE];
+	if(board->us == BLACK){
+		if(board->castling_rights[BKINGSIDE]){
+			if(board->squares[61] == EMPTY && board->squares[62] == EMPTY){
+				if(!isAttacked(board->us,61) && !isAttacked(board->us,62)){
+					list.moves[list.count++] = board->castle_moves[BKINGSIDE];
 				}
 			}
 		}
-		if(board.castling_rights[BQUEENSIDE]){
-			if(board.squares[57] == EMPTY && board.squares[58] == EMPTY && board.squares[59] == EMPTY){
-				if(!isAttacked(board,board.us,58) && !isAttacked(board,board.us,59)){
-					list.moves[list.count++] = board.castle_moves[BQUEENSIDE];
+		if(board->castling_rights[BQUEENSIDE]){
+			if(board->squares[57] == EMPTY && board->squares[58] == EMPTY && board->squares[59] == EMPTY){
+				if(!isAttacked(board->us,58) && !isAttacked(board->us,59)){
+					list.moves[list.count++] = board->castle_moves[BQUEENSIDE];
 				}
 			}
 		}
 	}
 }
 
-void Movegen::genEvades(const Board& board, Movelist& list, const Color& color)
+void Movegen::genEvades(Movelist& list, const Color& color)
 {
-	assert(board.getKings(color));
-	square king_sq = bitScanForward(board.getKings(color));
-	bitboard moves = king_moves[king_sq] & ~board.getAllPieces(color);
+	assert(board->getKings(color));
+	square king_sq = bitScanForward(board->getKings(color));
+	bitboard moves = king_moves[king_sq] & ~board->getAllPieces(color);
 
 	while(moves){
 		square to = pop_lsb(moves);
-		if(!isAttacked(board,color,to)){
-			list.moves[list.count++] = encodeMove(king_sq,to,KING,board.squares[to]);
+		if(!isAttacked(color,to)){
+			list.moves[list.count++] = encodeMove(king_sq,to,KING,board->squares[to]);
 		}
 	}
-	bitboard attackers = getAttackers(board,color,king_sq);
+	bitboard attackers = getAttackers(color,king_sq);
 	// if there is only one attacker, we can get out of check by taking the attacker,
 	// or by moving a piece between the king and the attacker
 
 	if(popCount(attackers) == 1){
 		square attacker_sq = pop_lsb(attackers);
 		//capture the attacking piece
-		bitboard defenders = getAttackers(board, board.them, attacker_sq)
-				& ~board.getKings(color);
+		bitboard defenders = getAttackers(board->them, attacker_sq)
+				& ~board->getKings(color);
 
 		while(defenders){
 			square from = pop_lsb(defenders);
-			Piece defender = board.squares[from];
+			Piece defender = board->squares[from];
 
 			if(defender == PAWN){
 				//check for a promotion
 				if(attacker_sq > 55 || attacker_sq < 8){
-					genPromotion(board,list,from,attacker_sq);
+					genPromotion(list,from,attacker_sq);
 				}else{
-					list.moves[list.count++] = encodeMove(from,attacker_sq,defender,board.squares[attacker_sq]);
+					list.moves[list.count++] = encodeMove(from,attacker_sq,defender,board->squares[attacker_sq]);
 				}
 			}
 			if(defender != PAWN){
-				list.moves[list.count++] = encodeMove(from,attacker_sq,defender,board.squares[attacker_sq]);
+				list.moves[list.count++] = encodeMove(from,attacker_sq,defender,board->squares[attacker_sq]);
 			}
 		}
 
-		Piece attacker_piece = board.squares[attacker_sq];
+		Piece attacker_piece = board->squares[attacker_sq];
 		if(attacker_piece == QUEEN || attacker_piece == BISHOP || attacker_piece == ROOK){
 			bitboard interposing_sqs = between[king_sq][attacker_sq];
 			while(interposing_sqs){
 				square to = pop_lsb(interposing_sqs);
-				bitboard interposing_pieces = getMovers(board,color,to) & ~board.getKings(color) & ~pinned_pieces;
+				bitboard interposing_pieces = getMovers(color,to) & ~board->getKings(color) & ~pinned_pieces;
 				while(interposing_pieces){
 					square from = pop_lsb(interposing_pieces);
-					Piece interposing_piece = board.squares[from];
+					Piece interposing_piece = board->squares[from];
 					if(interposing_piece == PAWN){
 						if(to > 55 || to < 8){
-							genPromotion(board,list,from,to);
+							genPromotion(list,from,to);
 						}else{
-							list.moves[list.count++] = encodeMove(from,to,interposing_piece,board.squares[to]);
+							list.moves[list.count++] = encodeMove(from,to,interposing_piece,board->squares[to]);
 						}
 					}
 					if(interposing_piece != PAWN){
-						list.moves[list.count++] = encodeMove(from,to,interposing_piece,board.squares[to]);
+						list.moves[list.count++] = encodeMove(from,to,interposing_piece,board->squares[to]);
 					}
 				}
 			}
 		}
 		for(int i = 0; i != 2; ++i){
-			if(extractEP(board.en_passant[i]) == attacker_sq && board.en_passant[i] != NULLMOVE){
-				list.moves[list.count++] = board.en_passant[i];
+			if(extractEP(board->en_passant[i]) == attacker_sq && board->en_passant[i] != NULLMOVE){
+				list.moves[list.count++] = board->en_passant[i];
 			}
 		}
 	}
@@ -253,24 +257,24 @@ void Movegen::genEvades(const Board& board, Movelist& list, const Color& color)
 }
 
 // generate pseudolegal moves for all white pawns
-void Movegen::genWhitePawnMoves(const Board& board, Movelist& list)
+void Movegen::genWhitePawnMoves(Movelist& list)
 {
-	bitboard white_pawns = board.getPawns(WHITE);
-	bitboard white_pawn_push_fst = (white_pawns << NORT) & ~board.getAllPieces();
+	bitboard white_pawns = board->getPawns(WHITE);
+	bitboard white_pawn_push_fst = (white_pawns << NORT) & ~board->getAllPieces();
 	//if a piece got to rank 3 from rank 2, check if its possible to move again
-	bitboard white_pawn_push_snd = ((white_pawn_push_fst & RANK_3) << NORT) & ~board.getAllPieces();
+	bitboard white_pawn_push_snd = ((white_pawn_push_fst & RANK_3) << NORT) & ~board->getAllPieces();
 
 	bitboard white_pawn_left_attack = (white_pawns & CLEAR_FILE_A) << NOWE;
 	bitboard white_pawn_right_attack = (white_pawns & CLEAR_FILE_H) << NOEA;
 	// only Attack occupied squares
-	white_pawn_left_attack = white_pawn_left_attack & board.getBlackPieces();
-	white_pawn_right_attack = white_pawn_right_attack & board.getBlackPieces();
+	white_pawn_left_attack = white_pawn_left_attack & board->getBlackPieces();
+	white_pawn_right_attack = white_pawn_right_attack & board->getBlackPieces();
 
 	// spool Moves to the movelist
 	while(white_pawn_push_fst){
 		square to = pop_lsb(white_pawn_push_fst);
 		if(to > 55){
-			genPromotion(board,list,to-NORT,to);
+			genPromotion(list,to-NORT,to);
 		}else{
 			list.moves[list.count++] = encodeMove(to-NORT,to,PAWN);
 		}
@@ -284,41 +288,41 @@ void Movegen::genWhitePawnMoves(const Board& board, Movelist& list)
 	while(white_pawn_left_attack){
 		square to = pop_lsb(white_pawn_left_attack);
 		if(to > 55){
-			genPromotion(board,list,to-NOWE,to);
+			genPromotion(list,to-NOWE,to);
 		}else{
-			list.moves[list.count++] = encodeMove(to-NOWE,to,PAWN,board.squares[to]);
+			list.moves[list.count++] = encodeMove(to-NOWE,to,PAWN,board->squares[to]);
 		}
 	}
 
 	while(white_pawn_right_attack){
 		square to = pop_lsb(white_pawn_right_attack);
 		if(to > 55){
-			genPromotion(board,list,to-NOEA,to);
+			genPromotion(list,to-NOEA,to);
 		}else{
-			list.moves[list.count++] = encodeMove(to-NOEA,to,PAWN,board.squares[to]);
+			list.moves[list.count++] = encodeMove(to-NOEA,to,PAWN,board->squares[to]);
 		}
 	}
 }
 
 // generate pseudolegal moves for all black pawns, using similiar logic to the white pawns, but shifting the bitboards to the right.
-void Movegen::genBlackPawnMoves(const Board& board, Movelist& list)
+void Movegen::genBlackPawnMoves(Movelist& list)
 {
-	bitboard black_pawns = board.getPawns(BLACK);
-	bitboard black_pawn_push_fst = (black_pawns >> SOUT) & ~board.getAllPieces();
+	bitboard black_pawns = board->getPawns(BLACK);
+	bitboard black_pawn_push_fst = (black_pawns >> SOUT) & ~board->getAllPieces();
 	//if a piece got to rank 3 from rank 2, check if its possible to move again
-	bitboard black_pawn_push_snd = ((black_pawn_push_fst & RANK_6) >> SOUT) & ~board.getAllPieces();
+	bitboard black_pawn_push_snd = ((black_pawn_push_fst & RANK_6) >> SOUT) & ~board->getAllPieces();
 
 	bitboard black_pawn_left_attack = (black_pawns & CLEAR_FILE_A) >> SOWE;
 	bitboard black_pawn_right_attack = (black_pawns & CLEAR_FILE_H) >> SOEA;
 	// only Attack occupied squares
-	black_pawn_left_attack = black_pawn_left_attack & board.getWhitePieces();
-	black_pawn_right_attack = black_pawn_right_attack & board.getWhitePieces();
+	black_pawn_left_attack = black_pawn_left_attack & board->getWhitePieces();
+	black_pawn_right_attack = black_pawn_right_attack & board->getWhitePieces();
 
 	// spool Moves to the movelist
 	while(black_pawn_push_fst){
 		square to = pop_lsb(black_pawn_push_fst);
 		if(to < 8){
-			genPromotion(board,list,to+SOUT,to);
+			genPromotion(list,to+SOUT,to);
 		}else{
 			list.moves[list.count++] = encodeMove(to+SOUT,to,PAWN);
 		}
@@ -331,54 +335,54 @@ void Movegen::genBlackPawnMoves(const Board& board, Movelist& list)
 	while(black_pawn_left_attack){
 		square to = pop_lsb(black_pawn_left_attack);
 		if(to < 8){
-			genPromotion(board,list,to+SOWE,to);
+			genPromotion(list,to+SOWE,to);
 		}else{
-			list.moves[list.count++] = encodeMove(to+SOWE,to,PAWN,board.squares[to]);
+			list.moves[list.count++] = encodeMove(to+SOWE,to,PAWN,board->squares[to]);
 		}
 	}
 
 	while(black_pawn_right_attack){
 		square to = pop_lsb(black_pawn_right_attack);
 		if(to < 8){
-			genPromotion(board,list,to+SOEA,to);
+			genPromotion(list,to+SOEA,to);
 		}else{
-			list.moves[list.count++] = encodeMove(to+SOEA,to,PAWN,board.squares[to]);
+			list.moves[list.count++] = encodeMove(to+SOEA,to,PAWN,board->squares[to]);
 		}
 	}
 }
 
-void Movegen::genPromotion(const Board& board, Movelist& list,const square& from, const square& to)
+void Movegen::genPromotion(Movelist& list,const square& from, const square& to)
 {
-	list.moves[list.count++] = encodeMove(from,to,PAWN,board.squares[to],KNIGHT);
-	list.moves[list.count++] = encodeMove(from,to,PAWN,board.squares[to],BISHOP);
-	list.moves[list.count++] = encodeMove(from,to,PAWN,board.squares[to],ROOK);
-	list.moves[list.count++] = encodeMove(from,to,PAWN,board.squares[to],QUEEN);
+	list.moves[list.count++] = encodeMove(from,to,PAWN,board->squares[to],KNIGHT);
+	list.moves[list.count++] = encodeMove(from,to,PAWN,board->squares[to],BISHOP);
+	list.moves[list.count++] = encodeMove(from,to,PAWN,board->squares[to],ROOK);
+	list.moves[list.count++] = encodeMove(from,to,PAWN,board->squares[to],QUEEN);
 }
 
 
 //generate pseudolegal moves for the Bishops of one color, using BuzzOS magic bitboard implementation
-void Movegen::genBishopMoves(const Board& board, Movelist& list)
+void Movegen::genBishopMoves(Movelist& list)
 {
-	bitboard bishops = board.getBishops(board.us);
+	bitboard bishops = board->getBishops(board->us);
 	while(bishops){
 		square from = pop_lsb(bishops);
-		bitboard moves =  Bmagic(from, board.getAllPieces()) & ~board.getAllPieces(board.us);
+		bitboard moves =  Bmagic(from, board->getAllPieces()) & ~board->getAllPieces(board->us);
 		while(moves){
 			square to = pop_lsb(moves);
-			list.moves[list.count++] = encodeMove(from,to,BISHOP,board.squares[to]);
+			list.moves[list.count++] = encodeMove(from,to,BISHOP,board->squares[to]);
 		}
 	}
 }
 
 //generate legal moves for the king of one color
-void Movegen::genKingMoves(const Board& board, Movelist& list)
+void Movegen::genKingMoves(Movelist& list)
 {
-	square from = bitScanForward(board.getKings(board.us));
-	bitboard moves = king_moves[from] & ~board.getAllPieces(board.us);
+	square from = bitScanForward(board->getKings(board->us));
+	bitboard moves = king_moves[from] & ~board->getAllPieces(board->us);
 	while(moves){
 		square to = pop_lsb(moves);
-		if(!isAttacked(board,board.us,to)){
-			list.moves[list.count++] = encodeMove(from,to,KING,board.squares[to]);
+		if(!isAttacked(board->us,to)){
+			list.moves[list.count++] = encodeMove(from,to,KING,board->squares[to]);
 		}
 
 	}
@@ -386,206 +390,206 @@ void Movegen::genKingMoves(const Board& board, Movelist& list)
 
 
 //generate pseudolegal moves for all knights of one color
-void Movegen::genKnightMoves(const Board& board, Movelist& list)
+void Movegen::genKnightMoves(Movelist& list)
 {
-	bitboard knights = board.getKnights(board.us);
+	bitboard knights = board->getKnights(board->us);
 	while(knights){
 		square from = pop_lsb(knights);
-		bitboard moves = knight_moves[from] & ~board.getAllPieces(board.us);
+		bitboard moves = knight_moves[from] & ~board->getAllPieces(board->us);
 		while(moves){
 			square to = pop_lsb(moves);
-			list.moves[list.count++] = encodeMove(from,to,KNIGHT,board.squares[to]);
+			list.moves[list.count++] = encodeMove(from,to,KNIGHT,board->squares[to]);
 		}
 	}
 }
 
 //generate pseudolegal moves for the Rooks of one color, using BuzzOS magic bitboard implementation
-void Movegen::genRookMoves(const Board& board, Movelist& list)
+void Movegen::genRookMoves(Movelist& list)
 {
-	bitboard rooks = board.getRooks(board.us);
+	bitboard rooks = board->getRooks(board->us);
 	while(rooks){
 		square from = pop_lsb(rooks);
-		bitboard moves =  Rmagic(from, board.getAllPieces())  & ~board.getAllPieces(board.us);
+		bitboard moves =  Rmagic(from, board->getAllPieces())  & ~board->getAllPieces(board->us);
 		while(moves){
 			square to = pop_lsb(moves);
-			list.moves[list.count++] = encodeMove(from,to,ROOK,board.squares[to]);
+			list.moves[list.count++] = encodeMove(from,to,ROOK,board->squares[to]);
 		}
 	}
 }
 
 //generate pseudolegal moves for the Queen of one color, using BuzzOS magic bitboard implementation
-void Movegen::genQueenMoves(const Board& board, Movelist& list)
+void Movegen::genQueenMoves(Movelist& list)
 {
-	bitboard queen = board.getQueens(board.us);
+	bitboard queen = board->getQueens(board->us);
 	while(queen){
 		square from = pop_lsb(queen);
-		bitboard moves =  (Bmagic(from, board.getAllPieces()) | Rmagic(from, board.getAllPieces()))  & ~board.getAllPieces(board.us);
+		bitboard moves =  (Bmagic(from, board->getAllPieces()) | Rmagic(from, board->getAllPieces()))  & ~board->getAllPieces(board->us);
 		while(moves){
 			square to = pop_lsb(moves);
-			list.moves[list.count++] = encodeMove(from,to,QUEEN,board.squares[to]);
+			list.moves[list.count++] = encodeMove(from,to,QUEEN,board->squares[to]);
 		}
 	}
 }
 
 // returns a bitboard containing all the pieces of a color that can move to a square (to include pawn pushes)
-bitboard Movegen::getMovers(const Board& board, const Color& color, const square& sq)
+bitboard Movegen::getMovers(const Color& color, const square& sq)
 {
-	return getAttackers(board,board.flipColor(color),sq) | getPawnMovers(board,color,sq);
+	return getAttackers(board->flipColor(color),sq) | getPawnMovers(color,sq);
 }
 
 // returns all pawns that can move to a square
-bitboard Movegen::getPawnMovers(const Board& board, const Color& color, const square& sq)
+bitboard Movegen::getPawnMovers(const Color& color, const square& sq)
 {
 	bitboard pawns = 0;
 	bitboard pawn_push_fst = 0;
 	bitboard pawn_push_snd = 0;
 
 	if(color == WHITE){
-		pawns = board.getPawns(WHITE);
-		pawn_push_fst = (pawns << NORT) & ~board.getAllPieces();
-		if(pawn_push_fst & board.square_mask[sq]){
-			return board.square_mask[sq-NORT];
+		pawns = board->getPawns(WHITE);
+		pawn_push_fst = (pawns << NORT) & ~board->getAllPieces();
+		if(pawn_push_fst & board->square_mask[sq]){
+			return board->square_mask[sq-NORT];
 		}
 		//if a piece got to rank 3 from rank 2, check if its possible to move again
-		pawn_push_snd = ((pawn_push_fst & RANK_3) << NORT) & ~board.getAllPieces();
-		if(pawn_push_snd & board.square_mask[sq]){
-			return board.square_mask[sq-NORT*2];
+		pawn_push_snd = ((pawn_push_fst & RANK_3) << NORT) & ~board->getAllPieces();
+		if(pawn_push_snd & board->square_mask[sq]){
+			return board->square_mask[sq-NORT*2];
 		}
 	}
 
 	if(color == BLACK){
-		pawns = board.getPawns(BLACK);
-		pawn_push_fst = (pawns >> SOUT) & ~board.getAllPieces();
-		if(pawn_push_fst & board.square_mask[sq]){
-			return board.square_mask[sq+NORT];
+		pawns = board->getPawns(BLACK);
+		pawn_push_fst = (pawns >> SOUT) & ~board->getAllPieces();
+		if(pawn_push_fst & board->square_mask[sq]){
+			return board->square_mask[sq+NORT];
 		}
 		//if a piece got to rank 3 from rank 2, check if its possible to move again
-		pawn_push_snd = ((pawn_push_fst & RANK_6) >> SOUT) & ~board.getAllPieces();
-		if(pawn_push_snd & board.square_mask[sq]){
-			return board.square_mask[sq+NORT*2];
+		pawn_push_snd = ((pawn_push_fst & RANK_6) >> SOUT) & ~board->getAllPieces();
+		if(pawn_push_snd & board->square_mask[sq]){
+			return board->square_mask[sq+NORT*2];
 		}
 
 	}
 	return 0;
 }
 
-bitboard Movegen::getAttackers(const Board& board, const Color& color, const square& sq)
+bitboard Movegen::getAttackers(const Color& color, const square& sq)
 {
 	bitboard attackset = 0;
 
 	if(color == BLACK){
-		bitboard white_pawn_left_attack = (board.getPawns(WHITE) & CLEAR_FILE_A) << NOWE;
-		bitboard white_pawn_right_attack = (board.getPawns(WHITE) & CLEAR_FILE_H) << NOEA;
+		bitboard white_pawn_left_attack = (board->getPawns(WHITE) & CLEAR_FILE_A) << NOWE;
+		bitboard white_pawn_right_attack = (board->getPawns(WHITE) & CLEAR_FILE_H) << NOEA;
 		// only Attack occupied squares
-		white_pawn_left_attack = white_pawn_left_attack & board.getBlackPieces();
-		white_pawn_right_attack = white_pawn_right_attack & board.getBlackPieces();
+		white_pawn_left_attack = white_pawn_left_attack & board->getBlackPieces();
+		white_pawn_right_attack = white_pawn_right_attack & board->getBlackPieces();
 		//add Piece to attackset by shifting back
-		if(board.square_mask[sq] & white_pawn_left_attack){
-			attackset |= (board.square_mask[sq] & CLEAR_FILE_H) >> SOEA;
+		if(board->square_mask[sq] & white_pawn_left_attack){
+			attackset |= (board->square_mask[sq] & CLEAR_FILE_H) >> SOEA;
 		}
-		if(board.square_mask[sq] & white_pawn_right_attack){
-			attackset |= (board.square_mask[sq] & CLEAR_FILE_A) >> SOWE;
+		if(board->square_mask[sq] & white_pawn_right_attack){
+			attackset |= (board->square_mask[sq] & CLEAR_FILE_A) >> SOWE;
 		}
 	}
 
 	if(color == WHITE){
-		bitboard black_pawn_left_attack = (board.getPawns(BLACK) & CLEAR_FILE_A) >> SOWE;
-		bitboard black_pawn_right_attack = (board.getPawns(BLACK) & CLEAR_FILE_H) >> SOEA;
+		bitboard black_pawn_left_attack = (board->getPawns(BLACK) & CLEAR_FILE_A) >> SOWE;
+		bitboard black_pawn_right_attack = (board->getPawns(BLACK) & CLEAR_FILE_H) >> SOEA;
 		// only Attack occupied squares
-		black_pawn_left_attack = black_pawn_left_attack & board.getWhitePieces();
-		black_pawn_right_attack = black_pawn_right_attack & board.getWhitePieces();
-		if(board.square_mask[sq] & black_pawn_left_attack){
-			attackset |= (board.square_mask[sq] & CLEAR_FILE_H) << NOEA;
+		black_pawn_left_attack = black_pawn_left_attack & board->getWhitePieces();
+		black_pawn_right_attack = black_pawn_right_attack & board->getWhitePieces();
+		if(board->square_mask[sq] & black_pawn_left_attack){
+			attackset |= (board->square_mask[sq] & CLEAR_FILE_H) << NOEA;
 		}
-		if(board.square_mask[sq] & black_pawn_right_attack){
-			attackset |= (board.square_mask[sq] & CLEAR_FILE_A) << NOWE;
+		if(board->square_mask[sq] & black_pawn_right_attack){
+			attackset |= (board->square_mask[sq] & CLEAR_FILE_A) << NOWE;
 		}
 	}
 
-	attackset |= (knight_moves[sq] & board.getKnights(board.flipColor(color)));
+	attackset |= (knight_moves[sq] & board->getKnights(board->flipColor(color)));
 
 	//bishop,queen attacks
-	bitboard sliding_attacks = Bmagic(sq, board.getAllPieces()) & ~board.getAllPieces(color);
-	attackset |= (sliding_attacks & (board.getBishops(board.flipColor(color)) | board.getQueens(board.flipColor(color))));
+	bitboard sliding_attacks = Bmagic(sq, board->getAllPieces()) & ~board->getAllPieces(color);
+	attackset |= (sliding_attacks & (board->getBishops(board->flipColor(color)) | board->getQueens(board->flipColor(color))));
 
 	//rook,queen attacks
-	sliding_attacks = Rmagic(sq, board.getAllPieces()) & ~board.getAllPieces(color);
-	attackset |= (sliding_attacks & (board.getRooks(board.flipColor(color)) | board.getQueens(board.flipColor(color))));
+	sliding_attacks = Rmagic(sq, board->getAllPieces()) & ~board->getAllPieces(color);
+	attackset |= (sliding_attacks & (board->getRooks(board->flipColor(color)) | board->getQueens(board->flipColor(color))));
 
 	//king attacks
-	attackset |= (king_moves[sq] & board.getKings(board.flipColor(color)));
+	attackset |= (king_moves[sq] & board->getKings(board->flipColor(color)));
 	return attackset;
 
 }
 
 // returns true if a square is attacked by any piece of a color
-bool Movegen::isAttacked(const Board& board, const Color& color, const square& sq)
+bool Movegen::isAttacked(const Color& color, const square& sq)
 {
 	bitboard attacks = 0;
 
 	if(color == BLACK){
-		bitboard white_pawn_left_attack = (board.getPawns(WHITE) & CLEAR_FILE_A) << NOWE;
-		bitboard white_pawn_right_attack = (board.getPawns(WHITE) & CLEAR_FILE_H) << NOEA;
-		if(board.square_mask[sq] & (white_pawn_left_attack | white_pawn_right_attack)){
+		bitboard white_pawn_left_attack = (board->getPawns(WHITE) & CLEAR_FILE_A) << NOWE;
+		bitboard white_pawn_right_attack = (board->getPawns(WHITE) & CLEAR_FILE_H) << NOEA;
+		if(board->square_mask[sq] & (white_pawn_left_attack | white_pawn_right_attack)){
 			return true;
 		}
 	}
 	if(color == WHITE){
-		bitboard black_pawn_left_attack = (board.getPawns(BLACK) & CLEAR_FILE_A) >> SOWE;
-		bitboard black_pawn_right_attack = (board.getPawns(BLACK) & CLEAR_FILE_H) >> SOEA;
-		if(board.square_mask[sq] & (black_pawn_left_attack | black_pawn_right_attack)){
+		bitboard black_pawn_left_attack = (board->getPawns(BLACK) & CLEAR_FILE_A) >> SOWE;
+		bitboard black_pawn_right_attack = (board->getPawns(BLACK) & CLEAR_FILE_H) >> SOEA;
+		if(board->square_mask[sq] & (black_pawn_left_attack | black_pawn_right_attack)){
 			return true;
 		}
 	}
 
-	if(knight_moves[sq] & board.getKnights(board.flipColor(color))){
+	if(knight_moves[sq] & board->getKnights(board->flipColor(color))){
 		return true;
 	}
 
-	attacks = Bmagic(sq, board.getAllPieces()) & ~board.getAllPieces(color);
-	if(attacks & (board.getBishops(board.flipColor(color)) | board.getQueens(board.flipColor(color)))){
+	attacks = Bmagic(sq, board->getAllPieces()) & ~board->getAllPieces(color);
+	if(attacks & (board->getBishops(board->flipColor(color)) | board->getQueens(board->flipColor(color)))){
 		return true;
 	}
-	attacks = Rmagic(sq, board.getAllPieces()) & ~board.getAllPieces(color);
-	if(attacks & (board.getRooks(board.flipColor(color)) | board.getQueens(board.flipColor(color)))){
+	attacks = Rmagic(sq, board->getAllPieces()) & ~board->getAllPieces(color);
+	if(attacks & (board->getRooks(board->flipColor(color)) | board->getQueens(board->flipColor(color)))){
 		return true;
 	}
-	if(king_moves[sq] & board.getKings(board.flipColor(color))){
+	if(king_moves[sq] & board->getKings(board->flipColor(color))){
 		return true;
 	}
 	return false;
 }
 
-bool Movegen::isInCheck(const Board& board, const Color& color)
+bool Movegen::isInCheck(const Color& color)
 {
-	assert(board.getKings(color));
-	square king_sq = bitScanForward(board.getKings(color));
-	return isAttacked(board,color,king_sq);
+	assert(board->getKings(color));
+	square king_sq = bitScanForward(board->getKings(color));
+	return isAttacked(color,king_sq);
 }
 
-bitboard Movegen::pinnedPieces(const Board& board, const Color& color)
+bitboard Movegen::pinnedPieces(const Color& color)
 {
-	bitboard king = board.getKings(color);
+	bitboard king = board->getKings(color);
 	square king_sq = pop_lsb(king);
 
 	bitboard pinned = EMPTYBOARD;
 
-	bitboard pinners = Rmagic(king_sq, EMPTYBOARD) & (board.getQueens(board.flipColor(color)) |
-			board.getRooks(board.flipColor(color)));
+	bitboard pinners = Rmagic(king_sq, EMPTYBOARD) & (board->getQueens(board->flipColor(color)) |
+			board->getRooks(board->flipColor(color)));
 	while(pinners){
 		square pinner_sq = pop_lsb(pinners);
-		bitboard pinnedpieces = between[king_sq][pinner_sq] & board.getAllPieces();
+		bitboard pinnedpieces = between[king_sq][pinner_sq] & board->getAllPieces();
 		if(popCount(pinnedpieces) == 1){
-			pinned |= pinnedpieces & board.getAllPieces(color);
+			pinned |= pinnedpieces & board->getAllPieces(color);
 		}
 	}
-	pinners = Bmagic(king_sq, EMPTYBOARD) & (board.getQueens(board.flipColor(color)) |
-			board.getBishops(board.flipColor(color)));
+	pinners = Bmagic(king_sq, EMPTYBOARD) & (board->getQueens(board->flipColor(color)) |
+			board->getBishops(board->flipColor(color)));
 	while(pinners){
 		square pinner_sq = pop_lsb(pinners);
-		bitboard pinnedpieces = between[king_sq][pinner_sq] & board.getAllPieces();
+		bitboard pinnedpieces = between[king_sq][pinner_sq] & board->getAllPieces();
 		if(popCount(pinnedpieces) == 1){
-			pinned |= pinnedpieces & board.getAllPieces(color);
+			pinned |= pinnedpieces & board->getAllPieces(color);
 		}
 	}
 
