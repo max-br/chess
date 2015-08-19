@@ -195,29 +195,33 @@ int negaMax(Board& board, Movegen& movegen, Evaluate& eval, int depth,Line* line
 	return max;
 }
 
+int val = 0;
+
 int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alpha, int beta, Line* line_ptr) {
     Line line;
     Movelist list;
 
     if (depth == 0) {
+    	//line_ptr->movecount = 0;
         return eval.evaluatePos(board);
     }
 
     movegen.genAllMoves(list);
-    int val = 0;
     for (int i = 0; i < list.count;++i)  {
+    	// only consider legal moves
     	if(board.makeMove(list.moves[i])){
             val = -alphaBeta(board,movegen,eval,depth - 1, -beta, -alpha, &line);
+            board.unmakeMove();
+            if (val >= beta) return beta;
+            if (val > alpha) {
+                alpha = val;
+                line_ptr->moves[0] = list.moves[i];
+                memcpy(line_ptr->moves + 1, line.moves, line.movecount * sizeof(Move));
+                line_ptr->movecount = line.movecount + 1;
+            }
+    	}else{
+    		board.unmakeMove();
     	}
-    	board.unmakeMove();
-
-        if (val >= beta) return beta;
-        if (val > alpha) {
-            alpha = val;
-            line_ptr->moves[0] = list.moves[i];
-            memcpy(line_ptr->moves + 1, line.moves, line.movecount * sizeof(Move));
-            line_ptr->movecount = line.movecount + 1;
-        }
     }
     return alpha;
 }
@@ -225,11 +229,10 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
 
 Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, int depth)
 {
-	Line a;
-	Line* line = &a;
-	negaMax(board,movegen,eval,depth,line);
-	//alphaBeta(board,movegen,eval,depth,-1000000,1000000,line);
-	return line->moves[0];
+	Line line;
+	//negaMax(board,movegen,eval,depth,line);
+	alphaBeta(board,movegen,eval,depth,-32000,32000,&line);
+	return line.moves[0];
 }
 
 string getCommand()
