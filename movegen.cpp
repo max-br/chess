@@ -88,15 +88,6 @@ inline Move Movegen::encodeMove(const square& from, const square& to,
 	return encodeFrom(from) | encodeTo(to) | encodePiece(piece) | encodeCapture(capture) | encodePromotion(promotion) | encodeEP(EP) | encodeMovetype(type);
 }
 
-bool searchNullMoves(const Movelist& list){
-	for(int i = 0; i < list.count; ++i){
-		if(list.moves[i] == NULLMOVE){
-			return false;
-		}
-	}
-	return true;
-}
-
 
 void Movegen::genAllMoves(Movelist& list)
 {
