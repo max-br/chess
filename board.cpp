@@ -36,6 +36,7 @@ Board::Board()
 bool Board::checkIntegrity()
 {
 	if(getAllPieces() & ~getPawns() & ~getBishops() & ~getKnights() & ~ getRooks() & ~getQueens() & ~getKings()){
+		printDebug();
 		return false;
 	}
 	return true;
@@ -128,19 +129,20 @@ void Board::updateCastlingRights(const Move& move, const Color& color)
 	}
 }
 
-void Board::makeMove(const Move& move, const Color& color)
+void Board::makeMove(const Move& move)
 {
 	assert(move!=NULLMOVE);
 
 	Moverecord record;
-	record.en_passant[0] = en_passant[0];
-	record.en_passant[1] = en_passant[1];
+
+	// copy castling rights and en passant moves to move record
+    memcpy(record.castling_rights, castling_rights, sizeof(bool) * 4);
+    memcpy(record.en_passant, en_passant, sizeof(Move) * 2);
 
 	en_passant[0] = 0;
 	en_passant[1] = 0;
 
 	// copy castling rights to move record
-    memcpy(record.castling_rights, castling_rights, sizeof(bool) * 4);
 
 	if(!extractEP(move) && !extractMovetype(move) && !extractPromotion(move)){
 		Piece piece = (Piece)extractPiece(move);
@@ -148,55 +150,48 @@ void Board::makeMove(const Move& move, const Color& color)
 		square to = extractTo(move);
 
 		// calculate en passants
-		checkEnPassant(from,to,piece,color);
+		checkEnPassant(from,to,piece,us);
 
 		record.move = move;
 		record.capture = (Piece)extractCapture(move);
-		record.color = color;
+		record.us = us;
+		record.them = them;
 		move_stack.push(record);
 
 		// enum Piece EMPTY == 0
 		if(record.capture){
 			piece_BB[record.capture] &= ~square_mask[to];
-			piece_BB[flipColor(color)] &= ~square_mask[to];
+			piece_BB[them] &= ~square_mask[to];
 		}
 
 		squares[from] = EMPTY;
 		squares[to] = piece;
 
 		piece_BB[piece] &= ~square_mask[from];
-		piece_BB[color] &= ~square_mask[from];
+		piece_BB[us] &= ~square_mask[from];
 
 		piece_BB[piece] |= square_mask[to];
-		piece_BB[color] |= square_mask[to];
-
-		assert(checkIntegrity());
-		updateCastlingRights(move, color);
-		assert(checkIntegrity());
-		return;
+		piece_BB[us] |= square_mask[to];
 	}
 	if(extractEP(move)){
-		makeEPMove(move,color, record);
-		updateCastlingRights(move, color);
-		assert(checkIntegrity());
-		return;
+		makeEPMove(move, record);
 	}
 	if(extractMovetype(move) == CASTLE){
-		makeCastleMove(move,color,record);
-		updateCastlingRights(move, color);
-		assert(checkIntegrity());
-		return;
+		makeCastleMove(move,record);
 	}
 	if(extractPromotion(move)){
-		makePromotionMove(move,color,record);
-		updateCastlingRights(move, color);
-		assert(checkIntegrity());
-		return;
+		makePromotionMove(move,record);
 	}
+
+	updateCastlingRights(move, us);
+	switchColor();
+
+	assert(checkIntegrity());
+	return;
 }
 
 //TODO: implement
-void Board::makePromotionMove(const Move& move, const Color& color, Moverecord& record)
+void Board::makePromotionMove(const Move& move, Moverecord& record)
 {
 	Piece piece = PAWN;
 	Piece promotion = (Piece)extractPromotion(move);
@@ -205,35 +200,32 @@ void Board::makePromotionMove(const Move& move, const Color& color, Moverecord& 
 
 	record.move = move;
 	record.capture = (Piece)extractCapture(move);
-	record.color = color;
+	record.us = us;
+	record.them = them;
 	move_stack.push(record);
 
 	// enum Piece EMPTY == 0
 	if(record.capture){
 		piece_BB[record.capture] &= ~square_mask[to];
-		piece_BB[flipColor(color)] &= ~square_mask[to];
+		piece_BB[them] &= ~square_mask[to];
 	}
 
 	squares[from] = EMPTY;
 	squares[to] = promotion;
 
 	piece_BB[piece] &= ~square_mask[from];
-	piece_BB[color] &= ~square_mask[from];
+	piece_BB[us] &= ~square_mask[from];
 
 	piece_BB[promotion] |= square_mask[to];
-	piece_BB[color] |= square_mask[to];
-	if(!checkIntegrity()){
-		printDebug();
-		printMove(move);
-		assert(checkIntegrity());
-	}
+	piece_BB[us] |= square_mask[to];
 }
 
-void Board::makeCastleMove(const Move& move, const Color& color, Moverecord& record)
+void Board::makeCastleMove(const Move& move, Moverecord& record)
 {
 	record.move = move;
 	record.capture = EMPTY;
-	record.color = color;
+	record.us = us;
+	record.them = them;
 	move_stack.push(record);
 
 	square rook_from = 0;
@@ -264,10 +256,10 @@ void Board::makeCastleMove(const Move& move, const Color& color, Moverecord& rec
 		king_from = 60;
 		king_to = 58;
 	}
-	piece_BB[color] |= square_mask[rook_to];
-	piece_BB[color] |= square_mask[king_to];
-	piece_BB[color] &= ~square_mask[rook_from];
-	piece_BB[color] &= ~square_mask[king_from];
+	piece_BB[us] |= square_mask[rook_to];
+	piece_BB[us] |= square_mask[king_to];
+	piece_BB[us] &= ~square_mask[rook_from];
+	piece_BB[us] &= ~square_mask[king_from];
 
 	piece_BB[ROOK] |= square_mask[rook_to];
 	piece_BB[ROOK] &= ~square_mask[rook_from];
@@ -283,11 +275,12 @@ void Board::makeCastleMove(const Move& move, const Color& color, Moverecord& rec
 
 }
 
-void Board::makeEPMove(const Move& move, const Color& color, Moverecord& record)
+void Board::makeEPMove(const Move& move, Moverecord& record)
 {
 	record.move = move;
 	record.capture = PAWN;
-	record.color = color;
+	record.us = us;
+	record.them = them;
 	move_stack.push(record);
 
 	square from = extractFrom(move);
@@ -298,7 +291,7 @@ void Board::makeEPMove(const Move& move, const Color& color, Moverecord& record)
 	// enum Piece EMPTY == 0
 	if(PAWN){
 		piece_BB[PAWN] &= ~square_mask[captured_sq];
-		piece_BB[flipColor(color)] &= ~square_mask[captured_sq];
+		piece_BB[them] &= ~square_mask[captured_sq];
 	}
 
 	squares[captured_sq] = EMPTY;
@@ -306,15 +299,17 @@ void Board::makeEPMove(const Move& move, const Color& color, Moverecord& record)
 	squares[to] = PAWN;
 
 	piece_BB[PAWN] &= ~square_mask[from];
-	piece_BB[color] &= ~square_mask[from];
+	piece_BB[us] &= ~square_mask[from];
 
 	piece_BB[PAWN] |= square_mask[to];
-	piece_BB[color] |= square_mask[to];
+	piece_BB[us] |= square_mask[to];
 	assert(checkIntegrity());
 }
 
 void Board::unmakeMove()
 {
+	switchColor();
+
 	Moverecord& lastmove = move_stack.top();
 
 	en_passant[0] = lastmove.en_passant[0];
@@ -333,17 +328,17 @@ void Board::unmakeMove()
 		squares[to] = lastmove.capture;
 
 		piece_BB[piece] &= ~square_mask[to];
-		piece_BB[lastmove.color] &= ~square_mask[to];
+		piece_BB[lastmove.us] &= ~square_mask[to];
 
 		piece_BB[piece] |= square_mask[from];
-		piece_BB[lastmove.color] |= square_mask[from];
+		piece_BB[lastmove.us] |= square_mask[from];
 
-		piece_BB[flipColor(lastmove.color)] &= ~square_mask[to];
+		piece_BB[lastmove.them] &= ~square_mask[to];
 
 		// enum Piece EMPTY == 0
 		if(lastmove.capture){
 			piece_BB[lastmove.capture] |= square_mask[to];
-			piece_BB[flipColor(lastmove.color)] |= square_mask[to];
+			piece_BB[lastmove.them] |= square_mask[to];
 		}
 		move_stack.pop();
 		assert(checkIntegrity());
@@ -352,19 +347,16 @@ void Board::unmakeMove()
 	if(extractEP(lastmove.move)){
 		unmakeEPMove(lastmove);
 		move_stack.pop();
-		assert(checkIntegrity());
 		return;
 	}
 	if(extractMovetype(lastmove.move) == CASTLE){
 		unmakeCastleMove(lastmove);
 		move_stack.pop();
-		assert(checkIntegrity());
 		return;
 	}
 	if(extractPromotion(lastmove.move)){
 		unmakePromotionMove(lastmove);
 		move_stack.pop();
-		assert(checkIntegrity());
 		return;
 	}
 }
@@ -400,10 +392,10 @@ void Board::unmakeCastleMove(const Moverecord& lastmove)
 		king_to = 60;
 	}
 
-	piece_BB[lastmove.color] |= square_mask[rook_to];
-	piece_BB[lastmove.color] |= square_mask[king_to];
-	piece_BB[lastmove.color] &= ~square_mask[rook_from];
-	piece_BB[lastmove.color] &= ~square_mask[king_from];
+	piece_BB[lastmove.us] |= square_mask[rook_to];
+	piece_BB[lastmove.us] |= square_mask[king_to];
+	piece_BB[lastmove.us] &= ~square_mask[rook_from];
+	piece_BB[lastmove.us] &= ~square_mask[king_from];
 
 	piece_BB[ROOK] |= square_mask[rook_to];
 	piece_BB[ROOK] &= ~square_mask[rook_from];
@@ -416,6 +408,7 @@ void Board::unmakeCastleMove(const Moverecord& lastmove)
 
 	squares[rook_to] = ROOK;
 	squares[king_to] = KING;
+	assert(checkIntegrity());
 }
 
 void Board::unmakeEPMove(const Moverecord& lastmove)
@@ -430,15 +423,14 @@ void Board::unmakeEPMove(const Moverecord& lastmove)
 	squares[captured_sq] = PAWN;
 
 	piece_BB[PAWN] &= ~square_mask[to];
-	piece_BB[lastmove.color] &= ~square_mask[to];
+	piece_BB[lastmove.us] &= ~square_mask[to];
 
 	piece_BB[PAWN] |= square_mask[from];
-	piece_BB[lastmove.color] |= square_mask[from];
+	piece_BB[lastmove.us] |= square_mask[from];
 
 	// put capped pawn on board again
 	piece_BB[PAWN] |= square_mask[captured_sq];
-	piece_BB[flipColor(lastmove.color)] |= square_mask[captured_sq];
-
+	piece_BB[lastmove.them] |= square_mask[captured_sq];
 	assert(checkIntegrity());
 }
 
@@ -452,18 +444,19 @@ void Board::unmakePromotionMove(const Moverecord& lastmove)
 	squares[to] = lastmove.capture;
 
 	piece_BB[promotion] &= ~square_mask[to];
-	piece_BB[lastmove.color] &= ~square_mask[to];
+	piece_BB[lastmove.us] &= ~square_mask[to];
 
 	piece_BB[PAWN] |= square_mask[from];
-	piece_BB[lastmove.color] |= square_mask[from];
+	piece_BB[lastmove.us] |= square_mask[from];
 
-	piece_BB[flipColor(lastmove.color)] &= ~square_mask[to];
+	piece_BB[lastmove.them] &= ~square_mask[to];
 
 	// enum Piece EMPTY == 0
 	if(lastmove.capture){
 		piece_BB[lastmove.capture] |= square_mask[to];
-		piece_BB[flipColor(lastmove.color)] |= square_mask[to];
+		piece_BB[lastmove.them] |= square_mask[to];
 	}
+	assert(checkIntegrity());
 }
 
 void Board::resetBoard()
@@ -571,10 +564,12 @@ void Board::setupFEN(const std::string fen){
 	++i;
 	while(i != fen.size() && fen[i] != ' '){
 		if(fen[i] == 'b'){
-			move_color = BLACK;
+			us = BLACK;
+			them = WHITE;
 		}
 		if(fen[i] == 'w'){
-			move_color = WHITE;
+			us = WHITE;
+			them = BLACK;
 		}
 		++i;
 	}
@@ -613,12 +608,12 @@ void Board::setupFEN(const std::string fen){
 	}
 	if(ep_sq_line && ep_sq_row){
 		square ep_sq = (ep_sq_line-1) * 8 + ep_sq_row - 1;
-		if(move_color == WHITE){
+		if(us == WHITE){
 			square from = ep_sq + 8;
 			square to = ep_sq - 8;
 			checkEnPassant(from,to,PAWN,BLACK);
 		}
-		if(move_color == BLACK){
+		if(us == BLACK){
 			square from = ep_sq - 8;
 			square to = ep_sq + 8;
 			checkEnPassant(from,to,PAWN,WHITE);
@@ -649,6 +644,13 @@ void Board::parseBB(bitboard bb,const char figure, char* output) const{
 		}
 	}
 }
+
+void Board::switchColor(){
+	Color tmp = us;
+	us = them;
+	them = tmp;
+}
+
 
 // parses bitboards to string and prints
 void Board::printBoard() const{
@@ -696,6 +698,7 @@ void Board::printDebug() const
 	}
 	std::cout << std::endl;
 	std::cout << "En passant: " << en_passant[0] << " " << en_passant[1] << std::endl;
+	std::cout << "color us: " << us << " them: " << them << std::endl;
 
 	printBoard();
 }

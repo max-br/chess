@@ -167,12 +167,12 @@ int Evaluate::position(const Board& board, const Color& color)
 	return pos;
 }
 
-int Evaluate::evaluatePos(const Board& board, const Color& color)
+int Evaluate::evaluatePos(const Board& board)
 {
 	int score = 0;
-	score += material(board,color) - material(board, board.flipColor(color));
-	score += mobility(board,color) - mobility(board,board.flipColor(color));
-	score += position(board,color);
+	score += material(board,board.us) - material(board, board.them);
+	score += mobility(board,board.us) - mobility(board,board.them);
+	score += position(board,board.us);
 	return score;
 }
 

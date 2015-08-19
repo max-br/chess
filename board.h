@@ -21,10 +21,11 @@ public:
 	// we need two in the (rare) case that there is two pawns beside a double pushed pawn
 	Move en_passant[2];
 	Move castle_moves[4];
+
 	bool castling_rights[4];
 	int fullmove_number, halfmove_number;
 
-	Color move_color;
+	Color us,them;
 
 	inline Color flipColor(const Color& color) const {return color == WHITE ? BLACK : WHITE;}
 
@@ -56,16 +57,17 @@ public:
 
 	void updateCastlingRights(const Move& move, const Color& color);
 
-	void makeCastleMove(const Move& move, const Color& color, Moverecord& record);
-	void makePromotionMove(const Move& move, const Color& color, Moverecord& record);
-	void makeEPMove(const Move& move, const Color& color, Moverecord& record);
-	void makeMove(const Move& move, const Color& color);
+	void makeCastleMove(const Move& move, Moverecord& record);
+	void makePromotionMove(const Move& move, Moverecord& record);
+	void makeEPMove(const Move& move, Moverecord& record);
+	void makeMove(const Move& move);
 
 	void unmakeCastleMove(const Moverecord& lastmove);
 	void unmakeEPMove(const Moverecord& lastmove);
 	void unmakePromotionMove(const Moverecord& lastmove);
 	void unmakeMove();
 
+	void switchColor();
 	void setupFEN(const std::string fen);
 	void resetBoard();
 

@@ -86,7 +86,7 @@ struct Moverecord{
 	Move 	en_passant[2];
 	bool	castling_rights[4];
 	Piece	capture;
-	Color	color;
+	Color	us,them;
 };
 
 enum enumSquare {

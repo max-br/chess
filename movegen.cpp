@@ -121,21 +121,21 @@ bool searchNullMoves(const Movelist& list){
 }
 
 
-void Movegen::genAllMoves(const Board& board, Movelist& list, const Color& color)
+void Movegen::genAllMoves(const Board& board, Movelist& list)
 {
-	pinned_pieces = pinnedPieces(board,color);
-	if(!isInCheck(board,color)){
-		if(color == WHITE){
+	pinned_pieces = pinnedPieces(board,board.us);
+	if(!isInCheck(board,board.us)){
+		if(board.us == WHITE){
 			genWhitePawnMoves(board,list);
 		}else{
 			genBlackPawnMoves(board,list);
 		}
-		genBishopMoves(board,list,color);
-		genKnightMoves(board,list,color);
-		genRookMoves(board,list,color);
-		genQueenMoves(board,list,color);
-		genKingMoves(board,list,color);
-		genCastles(board,list,color);
+		genBishopMoves(board,list);
+		genKnightMoves(board,list);
+		genRookMoves(board,list);
+		genQueenMoves(board,list);
+		genKingMoves(board,list);
+		genCastles(board,list);
 		//add en passants
 		for(int i = 0; i != 2; ++i){
 			if(board.en_passant[i] != NULLMOVE){
@@ -143,38 +143,38 @@ void Movegen::genAllMoves(const Board& board, Movelist& list, const Color& color
 			}
 		}
 	}else{
-		genEvades(board,list,color);
+		genEvades(board,list,board.us);
 	}
 }
 
-void Movegen::genCastles(const Board& board, Movelist& list, const Color& color){
-	if(color == WHITE){
+void Movegen::genCastles(const Board& board, Movelist& list){
+	if(board.us == WHITE){
 		if(board.castling_rights[WKINGSIDE]){
 			if(board.squares[5] == EMPTY && board.squares[6] == EMPTY){
-				if(!isAttacked(board,color,5) && !isAttacked(board,color,6)){
+				if(!isAttacked(board,board.us,5) && !isAttacked(board,board.us,6)){
 					list.moves[list.count++] = board.castle_moves[WKINGSIDE];
 				}
 			}
 		}
 		if(board.castling_rights[WQUEENSIDE]){
 			if(board.squares[1] == EMPTY && board.squares[2] == EMPTY && board.squares[3] == EMPTY){
-				if(!isAttacked(board,color,2) && !isAttacked(board,color,3)){
+				if(!isAttacked(board,board.us,2) && !isAttacked(board,board.us,3)){
 					list.moves[list.count++] = board.castle_moves[WQUEENSIDE];
 				}
 			}
 		}
 	}
-	if(color == BLACK){
+	if(board.us == BLACK){
 		if(board.castling_rights[BKINGSIDE]){
 			if(board.squares[61] == EMPTY && board.squares[62] == EMPTY){
-				if(!isAttacked(board,color,61) && !isAttacked(board,color,62)){
+				if(!isAttacked(board,board.us,61) && !isAttacked(board,board.us,62)){
 					list.moves[list.count++] = board.castle_moves[BKINGSIDE];
 				}
 			}
 		}
 		if(board.castling_rights[BQUEENSIDE]){
 			if(board.squares[57] == EMPTY && board.squares[58] == EMPTY && board.squares[59] == EMPTY){
-				if(!isAttacked(board,color,58) && !isAttacked(board,color,59)){
+				if(!isAttacked(board,board.us,58) && !isAttacked(board,board.us,59)){
 					list.moves[list.count++] = board.castle_moves[BQUEENSIDE];
 				}
 			}
@@ -201,7 +201,7 @@ void Movegen::genEvades(const Board& board, Movelist& list, const Color& color)
 	if(popCount(attackers) == 1){
 		square attacker_sq = pop_lsb(attackers);
 		//capture the attacking piece
-		bitboard defenders = getAttackers(board, board.flipColor(color), attacker_sq)
+		bitboard defenders = getAttackers(board, board.them, attacker_sq)
 				& ~board.getKings(color);
 
 		while(defenders){
@@ -357,12 +357,12 @@ void Movegen::genPromotion(const Board& board, Movelist& list,const square& from
 
 
 //generate pseudolegal moves for the Bishops of one color, using BuzzOS magic bitboard implementation
-void Movegen::genBishopMoves(const Board& board, Movelist& list, const Color& color)
+void Movegen::genBishopMoves(const Board& board, Movelist& list)
 {
-	bitboard bishops = board.getBishops(color);
+	bitboard bishops = board.getBishops(board.us);
 	while(bishops){
 		square from = pop_lsb(bishops);
-		bitboard moves =  Bmagic(from, board.getAllPieces()) & ~board.getAllPieces(color);
+		bitboard moves =  Bmagic(from, board.getAllPieces()) & ~board.getAllPieces(board.us);
 		while(moves){
 			square to = pop_lsb(moves);
 			list.moves[list.count++] = encodeMove(from,to,BISHOP,board.squares[to]);
@@ -371,29 +371,27 @@ void Movegen::genBishopMoves(const Board& board, Movelist& list, const Color& co
 }
 
 //generate legal moves for the king of one color
-void Movegen::genKingMoves(const Board& board, Movelist& list,const Color& color)
+void Movegen::genKingMoves(const Board& board, Movelist& list)
 {
-	if(board.getKings(color)){
-		square from = bitScanForward(board.getKings(color));
-		bitboard moves = king_moves[from] & ~board.getAllPieces(color);
-		while(moves){
-			square to = pop_lsb(moves);
-			if(!isAttacked(board,color,to)){
-				list.moves[list.count++] = encodeMove(from,to,KING,board.squares[to]);
-			}
-
+	square from = bitScanForward(board.getKings(board.us));
+	bitboard moves = king_moves[from] & ~board.getAllPieces(board.us);
+	while(moves){
+		square to = pop_lsb(moves);
+		if(!isAttacked(board,board.us,to)){
+			list.moves[list.count++] = encodeMove(from,to,KING,board.squares[to]);
 		}
+
 	}
 }
 
 
 //generate pseudolegal moves for all knights of one color
-void Movegen::genKnightMoves(const Board& board, Movelist& list,const Color& color)
+void Movegen::genKnightMoves(const Board& board, Movelist& list)
 {
-	bitboard knights = board.getKnights(color);
+	bitboard knights = board.getKnights(board.us);
 	while(knights){
 		square from = pop_lsb(knights);
-		bitboard moves = knight_moves[from] & ~board.getAllPieces(color);
+		bitboard moves = knight_moves[from] & ~board.getAllPieces(board.us);
 		while(moves){
 			square to = pop_lsb(moves);
 			list.moves[list.count++] = encodeMove(from,to,KNIGHT,board.squares[to]);
@@ -402,12 +400,12 @@ void Movegen::genKnightMoves(const Board& board, Movelist& list,const Color& col
 }
 
 //generate pseudolegal moves for the Rooks of one color, using BuzzOS magic bitboard implementation
-void Movegen::genRookMoves(const Board& board, Movelist& list, const Color& color)
+void Movegen::genRookMoves(const Board& board, Movelist& list)
 {
-	bitboard rooks = board.getRooks(color);
+	bitboard rooks = board.getRooks(board.us);
 	while(rooks){
 		square from = pop_lsb(rooks);
-		bitboard moves =  Rmagic(from, board.getAllPieces())  & ~board.getAllPieces(color);
+		bitboard moves =  Rmagic(from, board.getAllPieces())  & ~board.getAllPieces(board.us);
 		while(moves){
 			square to = pop_lsb(moves);
 			list.moves[list.count++] = encodeMove(from,to,ROOK,board.squares[to]);
@@ -416,12 +414,12 @@ void Movegen::genRookMoves(const Board& board, Movelist& list, const Color& colo
 }
 
 //generate pseudolegal moves for the Queen of one color, using BuzzOS magic bitboard implementation
-void Movegen::genQueenMoves(const Board& board, Movelist& list, const Color& color)
+void Movegen::genQueenMoves(const Board& board, Movelist& list)
 {
-	bitboard queen = board.getQueens(color);
+	bitboard queen = board.getQueens(board.us);
 	while(queen){
 		square from = pop_lsb(queen);
-		bitboard moves =  (Bmagic(from, board.getAllPieces()) | Rmagic(from, board.getAllPieces()))  & ~board.getAllPieces(color);
+		bitboard moves =  (Bmagic(from, board.getAllPieces()) | Rmagic(from, board.getAllPieces()))  & ~board.getAllPieces(board.us);
 		while(moves){
 			square to = pop_lsb(moves);
 			list.moves[list.count++] = encodeMove(from,to,QUEEN,board.squares[to]);

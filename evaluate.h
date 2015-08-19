@@ -25,7 +25,7 @@ public:
 
 	void initValueTables();
 
-	int evaluatePos(const Board& board, const Color& color);
+	int evaluatePos(const Board& board);
 	int piecePosition(bitboard& pieces, const Color& color,const Piece& type);
 
 

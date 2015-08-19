@@ -35,20 +35,20 @@ public:
 	inline Move encodeMove(const square& from, const square& to,
 			const Piece& piece, const Piece& capture, const Piece& promotion, const square& EP, const Movetype& type);
 
-	void genAllMoves(const Board& board, Movelist& list, const Color& color);
+	void genAllMoves(const Board& board, Movelist& list);
 
-	void genCastles(const Board& board, Movelist& list, const Color& color);
+	void genCastles(const Board& board, Movelist& list);
 	void genEvades(const Board& board, Movelist& list, const Color& color);
 	void genPromotion(const Board& board, Movelist& list,const square& from, const square& to);
 
 
 	void genWhitePawnMoves(const Board& board, Movelist& list);
 	void genBlackPawnMoves(const Board& board, Movelist& list);
-	void genBishopMoves(const Board& board, Movelist& list, const Color& color);
-	void genKingMoves(const Board& board, Movelist& list,const Color& color);
-	void genKnightMoves(const Board& board, Movelist& list, const Color& color);
-	void genRookMoves(const Board& board, Movelist& list, const Color& color);
-	void genQueenMoves(const Board& board, Movelist& list, const Color& color);
+	void genBishopMoves(const Board& board, Movelist& list);
+	void genKingMoves(const Board& board, Movelist& list);
+	void genKnightMoves(const Board& board, Movelist& list);
+	void genRookMoves(const Board& board, Movelist& list);
+	void genQueenMoves(const Board& board, Movelist& list);
 
 	bool isAttacked(const Board& board, const Color& color, const square& sq);
 	bool isInCheck(const Board& board, const Color& color);

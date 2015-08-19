@@ -15,19 +15,19 @@
 
 using namespace std;
 
-uint64_t perft(Board& board, Movegen& movegen,Color color,int depth)
+uint64_t perft(Board& board, Movegen& movegen,int depth)
 {
     Movelist movelist;
     uint64_t nodes = 0;
 
     if (depth == 0) return 1;
 
-    movegen.genAllMoves(board,movelist,color);
+    movegen.genAllMoves(board,movelist);
 
     for (int i = 0; i < movelist.count; i++) {
-    	board.makeMove(movelist.moves[i],color);
-    	if(!movegen.isInCheck(board,color)){
-    		nodes += perft(board,movegen,board.flipColor(color),depth - 1);
+    	board.makeMove(movelist.moves[i]);
+    	if(!movegen.isInCheck(board,board.them)){
+    		nodes += perft(board,movegen,depth - 1);
     	}
         board.unmakeMove();
     }
@@ -35,10 +35,10 @@ uint64_t perft(Board& board, Movegen& movegen,Color color,int depth)
 }
 
 
-uint64_t timePerft(Board& board, Movegen& movegen, Color color, int depth)
+uint64_t timePerft(Board& board, Movegen& movegen, int depth)
 {
 	clock_t startTime = clock();
-	uint64_t nodes = perft(board,movegen,color,depth);
+	uint64_t nodes = perft(board,movegen,depth);
 	double time = double( clock() - startTime ) / (double)CLOCKS_PER_SEC;
 
 	cout << fixed << "Nodes: " << nodes << " Time: " << time << " NPS: " << (uint64_t)nodes/time << endl;
@@ -46,29 +46,24 @@ uint64_t timePerft(Board& board, Movegen& movegen, Color color, int depth)
 }
 
 
-vector<string> divide(Board& board, Movegen& movegen,Color color,int depth)
+vector<string> divide(Board& board, Movegen& movegen,int depth)
 {
     Movelist movelist;
     vector<string> ret;
-    movegen.genAllMoves(board,movelist,color);
+    movegen.genAllMoves(board,movelist);
     int perft_cnt = 0;
 
     for (int i = 0; i < movelist.count; i++) {
     	string movestring;
-    	board.makeMove(movelist.moves[i],color);
-    	if(!movegen.isInCheck(board,color)){
-    		int perft_tmp = perft(board,movegen,board.flipColor(color),depth - 1);
+    	board.makeMove(movelist.moves[i]);
+    	if(!movegen.isInCheck(board,board.them)){
+    		int perft_tmp = perft(board,movegen,depth - 1);
     		perft_cnt += perft_tmp;
 
     		movestring += board.moveNotation(movelist.moves[i]);
     		movestring += to_string(perft_tmp);
     		ret.push_back(movestring);
     		cout << movestring << endl;
-    		if(!board.checkIntegrity()){
-    					board.printDebug();
-    					board.printMove(movelist.moves[i]);
-    					assert(board.checkIntegrity());
-    		}
     	}
         board.unmakeMove();
     }
@@ -99,37 +94,37 @@ void runTests()
 	cout << "Test 1: " << endl;
 	board.setupFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); // starting position
 	board.printBoard();
-	assert(timePerft(board,movegen,WHITE,6) == 119060324);
+	assert(timePerft(board,movegen,6) == 119060324);
 	cout << "Test 1 success" << endl;
 
 	cout << "Test 2: " << endl;
 	board.setupFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
 	board.printBoard();
-	assert(timePerft(board,movegen,WHITE,5) == 193690690);
+	assert(timePerft(board,movegen,5) == 193690690);
 	cout << "Test 2 success" << endl;
 
 	cout << "Test 3: " << endl;
 	board.setupFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
 	board.printBoard();
-	assert(timePerft(board,movegen,WHITE,6) == 11030083);
+	assert(timePerft(board,movegen,6) == 11030083);
 	cout << "Test 3 success" << endl;
 
 	cout << "Test 4: " << endl;
 	board.setupFEN("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
 	board.printBoard();
-	assert(timePerft(board,movegen,WHITE,5) == 15833292);
+	assert(timePerft(board,movegen,5) == 15833292);
 	cout << "Test 4 success" << endl;
 
 	cout << "Test 5: " << endl;
 	board.setupFEN("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
 	board.printBoard();
-	assert(timePerft(board,movegen,WHITE,3) == 62379);
+	assert(timePerft(board,movegen,3) == 62379);
 	cout << "Test 5 success" << endl;
 
 	cout << "Test 6: " << endl;
 	board.setupFEN("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
 	board.printBoard();
-	assert(timePerft(board,movegen,WHITE,5) == 164075551);
+	assert(timePerft(board,movegen,5) == 164075551);
 	cout << "Test 6 success" << endl;
 
 	cout << "All Tests successfull" << endl;
@@ -153,27 +148,27 @@ void compareDivide(vector<string> div1,vector<string> div2)
 
 void divideDebug(Board& board, Movegen& movegen, const Color& color, int depth)
 {
-	vector<string> div_res = divide(board,movegen,color,depth);
+	vector<string> div_res = divide(board,movegen,depth);
 	vector<string> div_in = divideInput();
 	compareDivide(div_res, div_in);
 }
 
 
-int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,const Color& color,int depth, int alpha, int beta, Line* line_ptr) {
+int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alpha, int beta, Line* line_ptr) {
     Line line;
     Movelist list;
 
     if (depth == 0) {
     	//line_ptr->movecount = 0;
-        return eval.evaluatePos(board,color);
+        return eval.evaluatePos(board);
     }
 
-    movegen.genAllMoves(board,list,color);
+    movegen.genAllMoves(board,list);
     int val = 0;
     for (int i = 0; i < list.count;++i)  {
-    	board.makeMove(list.moves[i],color);
-    	if(!movegen.isInCheck(board,color)){
-            val = -alphaBeta(board,movegen,eval,board.flipColor(color),depth - 1, -beta, -alpha, &line);
+    	board.makeMove(list.moves[i]);
+    	if(!movegen.isInCheck(board,board.them)){
+            val = -alphaBeta(board,movegen,eval,depth - 1, -beta, -alpha, &line);
     	}
     	board.unmakeMove();
 
@@ -193,7 +188,7 @@ Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, const Color& col
 {
 	Line a;
 	Line* line = &a;
-	alphaBeta(board,movegen,eval,color,depth,-10000000,10000000,line);
+	alphaBeta(board,movegen,eval,depth,-10000000,10000000,line);
 
 
 	for(int i = 0; i < line->movecount;i++){
@@ -262,7 +257,7 @@ void parseCommand(Board& board, Movegen& movegen, Evaluate& eval, const string& 
 			if(word == "depth"){
 				command >> depth;
 			}
-			Move bestmove = searchMove(board,movegen,eval,board.move_color,depth);
+			Move bestmove = searchMove(board,movegen,eval,board.us,depth);
 			sendMove(board, bestmove);
 		}
 		if(word == "quit"){
