@@ -201,10 +201,10 @@ void Board::updateCastlingRights(const Move& move, const Color& color)
 
 /* Make a move, put the Moverecord on the Movestack.
  * Returns:
- * 1: move is legal
- * 0: move is illegal
+ * true: move is legal
+ * false: move is illegal
  */
-int Board::makeMove(const Move& move)
+bool Board::makeMove(const Move& move)
 {
 	assert(move!=NULLMOVE);
 
@@ -258,16 +258,20 @@ int Board::makeMove(const Move& move)
 		makePromotionMove(move,record);
 	}
 
-	updateCastlingRights(move, us);
+	// check for illegal moves
 	if(isInCheck(us)){
+		updateCastlingRights(move, us);
+		switchColor();
 		assert(checkIntegrity());
-		return 0;
+		return false;
 	}
 	isCheck = isInCheck(them);
+
+	updateCastlingRights(move, us);
 	switchColor();
 
 	assert(checkIntegrity());
-	return 1;
+	return true;
 }
 
 //TODO: implement

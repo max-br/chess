@@ -174,6 +174,7 @@ int Evaluate::evaluatePos(const Board& board)
 	score += material(board,board.us) - material(board, board.them);
 	score += mobility(board,board.us) - mobility(board,board.them);
 	score += position(board,board.us);
+	score += board.isCheck * 200;
 	return score;
 }
 

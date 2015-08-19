@@ -66,7 +66,7 @@ public:
 	void makeCastleMove(const Move& move, Moverecord& record);
 	void makePromotionMove(const Move& move, Moverecord& record);
 	void makeEPMove(const Move& move, Moverecord& record);
-	int makeMove(const Move& move);
+	bool makeMove(const Move& move);
 
 	void unmakeCastleMove(const Moverecord& lastmove);
 	void unmakeEPMove(const Moverecord& lastmove);

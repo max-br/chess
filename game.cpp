@@ -18,16 +18,15 @@ using namespace std;
 
 uint64_t perft(Board& board, Movegen& movegen,int depth)
 {
-    Movelist movelist;
+    Movelist list;
     uint64_t nodes = 0;
 
     if (depth == 0) return 1;
 
-    movegen.genAllMoves(movelist);
+    movegen.genAllMoves(list);
 
-    for (int i = 0; i < movelist.count; i++) {
-    	board.makeMove(movelist.moves[i]);
-    	if(!board.isInCheck(board.them)){
+    for (int i = 0; i < list.count; i++) {
+    	if(board.makeMove(list.moves[i])){
     		nodes += perft(board,movegen,depth - 1);
     	}
         board.unmakeMove();
@@ -184,8 +183,7 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
     movegen.genAllMoves(list);
     int val = 0;
     for (int i = 0; i < list.count;++i)  {
-    	board.makeMove(list.moves[i]);
-    	if(!board.isInCheck(board.them)){
+    	if(board.makeMove(list.moves[i])){
             val = -alphaBeta(board,movegen,eval,depth - 1, -beta, -alpha, &line);
     	}
     	board.unmakeMove();
@@ -306,9 +304,9 @@ int main()
 	Movelist list;
 	Movegen movegen = Movegen(&board);
 
-	runTests();
+	//runTests();
 
-	//startUci(board,movegen,eval);
+	startUci(board,movegen,eval);
 
 	return 0;
 }
