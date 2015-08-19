@@ -15,7 +15,7 @@
 
 using namespace std;
 
-uint64_t perft(Board& board, Movegen& movegen,Piece color,int depth)
+uint64_t perft(Board& board, Movegen& movegen,Color color,int depth)
 {
     Movelist movelist;
     uint64_t nodes = 0;
@@ -35,7 +35,7 @@ uint64_t perft(Board& board, Movegen& movegen,Piece color,int depth)
 }
 
 
-uint64_t timePerft(Board& board, Movegen& movegen, const Piece& color, int depth)
+uint64_t timePerft(Board& board, Movegen& movegen, Color color, int depth)
 {
 	clock_t startTime = clock();
 	uint64_t nodes = perft(board,movegen,color,depth);
@@ -46,7 +46,7 @@ uint64_t timePerft(Board& board, Movegen& movegen, const Piece& color, int depth
 }
 
 
-vector<string> divide(Board& board, Movegen& movegen,Piece color,int depth)
+vector<string> divide(Board& board, Movegen& movegen,Color color,int depth)
 {
     Movelist movelist;
     vector<string> ret;
@@ -151,7 +151,7 @@ void compareDivide(vector<string> div1,vector<string> div2)
 	}
 }
 
-void divideDebug(Board& board, Movegen& movegen, const Piece& color, int depth)
+void divideDebug(Board& board, Movegen& movegen, const Color& color, int depth)
 {
 	vector<string> div_res = divide(board,movegen,color,depth);
 	vector<string> div_in = divideInput();
@@ -159,13 +159,15 @@ void divideDebug(Board& board, Movegen& movegen, const Piece& color, int depth)
 }
 
 
-int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,const Piece& color,int depth, int alpha, int beta, Line* line_ptr) {
+int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,const Color& color,int depth, int alpha, int beta, Line* line_ptr) {
     Line line;
+    Movelist list;
+
     if (depth == 0) {
-    	line_ptr->movecount = 0;
+    	//line_ptr->movecount = 0;
         return eval.evaluatePos(board,color);
     }
-    Movelist list;
+
     movegen.genAllMoves(board,list,color);
     int val = 0;
     for (int i = 0; i < list.count;++i)  {
@@ -187,16 +189,18 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,const Piece& color,
 }
 
 
-Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, const Piece& color, int depth)
+Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, const Color& color, int depth)
 {
 	Line a;
 	Line* line = &a;
 	alphaBeta(board,movegen,eval,color,depth,-10000000,10000000,line);
 
-	/*
-	for(int i = 0; i < line->movecount;++i){
+
+	for(int i = 0; i < line->movecount;i++){
+		cout << i;
 		board.printMove(line->moves[i]);
-	}*/
+	}
+	cout << endl;
 	return line->moves[0];
 }
 
@@ -289,19 +293,11 @@ int main()
 	Movelist list;
 	Movegen movegen;
 
-	//runTests();
+	runTests();
 
 
-	startUci(board,movegen,eval);
+	//startUci(board,movegen,eval);
 
-
-	/*
-	timePerft(board,movegen,board.move_color,1);
-	timePerft(board,movegen,board.move_color,2);
-	timePerft(board,movegen,board.move_color,3);
-	timePerft(board,movegen,board.move_color,4);
-	timePerft(board,movegen,board.move_color,5);
-*/
 	return 0;
 }
 

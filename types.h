@@ -54,9 +54,14 @@ enum Piece{
 	BISHOP,
 	ROOK,
 	QUEEN,
-	KING,
-	WHITE,
-	BLACK
+	KING
+	//WHITE,
+	//BLACK
+};
+
+enum Color{
+	WHITE = 7,
+	BLACK = 8
 };
 
 enum Castlingrights{
@@ -81,7 +86,7 @@ struct Moverecord{
 	Move 	en_passant[2];
 	bool	castling_rights[4];
 	Piece	capture;
-	Piece	color;
+	Color	color;
 };
 
 enum enumSquare {

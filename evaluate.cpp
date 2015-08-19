@@ -108,7 +108,7 @@ void Evaluate::initValueTables()
 // Evaluates material on a Board
 // Value:
 // 3P < N < B < R < Q
-int Evaluate::material(const Board& board, const Piece& color)
+int Evaluate::material(const Board& board, const Color& color)
 {
 	int mat = 0;
 	mat += popCount(board.getPawns(color)) * 100;
@@ -119,13 +119,13 @@ int Evaluate::material(const Board& board, const Piece& color)
 	return mat;
 }
 
-int Evaluate::mobility(const Board& board, const Piece& color)
+int Evaluate::mobility(const Board& board, const Color& color)
 {
 	int mob = 0;
 	return mob;
 }
 
-int Evaluate::piecePosition(bitboard& pieces, const Piece& color,const Piece& type)
+int Evaluate::piecePosition(bitboard& pieces, const Color& color,const Piece& type)
 {
 	int value = 0;
 	if(color == WHITE){
@@ -144,7 +144,7 @@ int Evaluate::piecePosition(bitboard& pieces, const Piece& color,const Piece& ty
 
 }
 
-int Evaluate::position(const Board& board, const Piece& color)
+int Evaluate::position(const Board& board, const Color& color)
 {
 	int pos = 0;
 	bitboard piece_bb = board.getPawns(color);
@@ -167,7 +167,7 @@ int Evaluate::position(const Board& board, const Piece& color)
 	return pos;
 }
 
-int Evaluate::evaluatePos(const Board& board, const Piece& color)
+int Evaluate::evaluatePos(const Board& board, const Color& color)
 {
 	int score = 0;
 	score += material(board,color) - material(board, board.flipColor(color));

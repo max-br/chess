@@ -24,23 +24,23 @@ public:
 	bool castling_rights[4];
 	int fullmove_number, halfmove_number;
 
-	Piece move_color;
+	Color move_color;
 
-	Piece flipColor(const Piece& color) const {return color == WHITE ? BLACK : WHITE;}
+	inline Color flipColor(const Color& color) const {return color == WHITE ? BLACK : WHITE;}
 
 	Board();
 	
 	bitboard getAllPieces() const {return piece_BB[WHITE] | piece_BB[BLACK];}
-	bitboard getAllPieces(Piece color) const {return color == WHITE ? piece_BB[WHITE] : piece_BB[BLACK];}
+	bitboard getAllPieces(Color color) const {return color == WHITE ? piece_BB[WHITE] : piece_BB[BLACK];}
 	bitboard getBlackPieces() const {return piece_BB[BLACK];}
 	bitboard getWhitePieces() const {return piece_BB[WHITE];}
 
-	bitboard getPawns(Piece color) const {return piece_BB[PAWN] & piece_BB[color];}
-	bitboard getKnights(Piece color) const {return piece_BB[KNIGHT] & piece_BB[color];}
-	bitboard getBishops(Piece color) const {return piece_BB[BISHOP] & piece_BB[color];}
-	bitboard getRooks(Piece color) const {return piece_BB[ROOK] & piece_BB[color];}
-	bitboard getQueens(Piece color) const {return piece_BB[QUEEN] & piece_BB[color];}
-	bitboard getKings(Piece color) const {return piece_BB[KING] & piece_BB[color];}
+	bitboard getPawns(Color color) const {return piece_BB[PAWN] & piece_BB[color];}
+	bitboard getKnights(Color color) const {return piece_BB[KNIGHT] & piece_BB[color];}
+	bitboard getBishops(Color color) const {return piece_BB[BISHOP] & piece_BB[color];}
+	bitboard getRooks(Color color) const {return piece_BB[ROOK] & piece_BB[color];}
+	bitboard getQueens(Color color) const {return piece_BB[QUEEN] & piece_BB[color];}
+	bitboard getKings(Color color) const {return piece_BB[KING] & piece_BB[color];}
 
 	bitboard getPawns() const {return piece_BB[PAWN];}
 	bitboard getKnights() const {return piece_BB[KNIGHT];}
@@ -50,16 +50,16 @@ public:
 	bitboard getKings() const {return piece_BB[KING];}
 
 	bool checkIntegrity();
-	void checkEnPassant(const square& from, const square& to, const Piece& piece, const Piece& color);
+	void checkEnPassant(const square& from, const square& to, const Piece& piece, const Color& color);
 	void checkLegalCastles(const Piece& color);
 
 
-	void updateCastlingRights(const Move& move, const Piece& color);
+	void updateCastlingRights(const Move& move, const Color& color);
 
-	void makeCastleMove(const Move& move, const Piece& color, Moverecord& record);
-	void makePromotionMove(const Move& move, const Piece& color, Moverecord& record);
-	void makeEPMove(const Move& move, const Piece& color, Moverecord& record);
-	void makeMove(const Move& move, const Piece& color);
+	void makeCastleMove(const Move& move, const Color& color, Moverecord& record);
+	void makePromotionMove(const Move& move, const Color& color, Moverecord& record);
+	void makeEPMove(const Move& move, const Color& color, Moverecord& record);
+	void makeMove(const Move& move, const Color& color);
 
 	void unmakeCastleMove(const Moverecord& lastmove);
 	void unmakeEPMove(const Moverecord& lastmove);

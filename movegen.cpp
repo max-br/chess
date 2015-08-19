@@ -121,7 +121,7 @@ bool searchNullMoves(const Movelist& list){
 }
 
 
-void Movegen::genAllMoves(const Board& board, Movelist& list, const Piece& color)
+void Movegen::genAllMoves(const Board& board, Movelist& list, const Color& color)
 {
 	pinned_pieces = pinnedPieces(board,color);
 	if(!isInCheck(board,color)){
@@ -147,7 +147,7 @@ void Movegen::genAllMoves(const Board& board, Movelist& list, const Piece& color
 	}
 }
 
-void Movegen::genCastles(const Board& board, Movelist& list, const Piece& color){
+void Movegen::genCastles(const Board& board, Movelist& list, const Color& color){
 	if(color == WHITE){
 		if(board.castling_rights[WKINGSIDE]){
 			if(board.squares[5] == EMPTY && board.squares[6] == EMPTY){
@@ -182,7 +182,7 @@ void Movegen::genCastles(const Board& board, Movelist& list, const Piece& color)
 	}
 }
 
-void Movegen::genEvades(const Board& board, Movelist& list, const Piece& color)
+void Movegen::genEvades(const Board& board, Movelist& list, const Color& color)
 {
 	assert(board.getKings(color));
 	square king_sq = bitScanForward(board.getKings(color));
@@ -357,7 +357,7 @@ void Movegen::genPromotion(const Board& board, Movelist& list,const square& from
 
 
 //generate pseudolegal moves for the Bishops of one color, using BuzzOS magic bitboard implementation
-void Movegen::genBishopMoves(const Board& board, Movelist& list, const Piece& color)
+void Movegen::genBishopMoves(const Board& board, Movelist& list, const Color& color)
 {
 	bitboard bishops = board.getBishops(color);
 	while(bishops){
@@ -371,7 +371,7 @@ void Movegen::genBishopMoves(const Board& board, Movelist& list, const Piece& co
 }
 
 //generate legal moves for the king of one color
-void Movegen::genKingMoves(const Board& board, Movelist& list,const Piece& color)
+void Movegen::genKingMoves(const Board& board, Movelist& list,const Color& color)
 {
 	if(board.getKings(color)){
 		square from = bitScanForward(board.getKings(color));
@@ -388,7 +388,7 @@ void Movegen::genKingMoves(const Board& board, Movelist& list,const Piece& color
 
 
 //generate pseudolegal moves for all knights of one color
-void Movegen::genKnightMoves(const Board& board, Movelist& list,const Piece& color)
+void Movegen::genKnightMoves(const Board& board, Movelist& list,const Color& color)
 {
 	bitboard knights = board.getKnights(color);
 	while(knights){
@@ -402,7 +402,7 @@ void Movegen::genKnightMoves(const Board& board, Movelist& list,const Piece& col
 }
 
 //generate pseudolegal moves for the Rooks of one color, using BuzzOS magic bitboard implementation
-void Movegen::genRookMoves(const Board& board, Movelist& list, const Piece& color)
+void Movegen::genRookMoves(const Board& board, Movelist& list, const Color& color)
 {
 	bitboard rooks = board.getRooks(color);
 	while(rooks){
@@ -416,7 +416,7 @@ void Movegen::genRookMoves(const Board& board, Movelist& list, const Piece& colo
 }
 
 //generate pseudolegal moves for the Queen of one color, using BuzzOS magic bitboard implementation
-void Movegen::genQueenMoves(const Board& board, Movelist& list, const Piece& color)
+void Movegen::genQueenMoves(const Board& board, Movelist& list, const Color& color)
 {
 	bitboard queen = board.getQueens(color);
 	while(queen){
@@ -430,13 +430,13 @@ void Movegen::genQueenMoves(const Board& board, Movelist& list, const Piece& col
 }
 
 // returns a bitboard containing all the pieces of a color that can move to a square (to include pawn pushes)
-bitboard Movegen::getMovers(const Board& board, const Piece& color, const square& sq)
+bitboard Movegen::getMovers(const Board& board, const Color& color, const square& sq)
 {
 	return getAttackers(board,board.flipColor(color),sq) | getPawnMovers(board,color,sq);
 }
 
 // returns all pawns that can move to a square
-bitboard Movegen::getPawnMovers(const Board& board, const Piece& color, const square& sq)
+bitboard Movegen::getPawnMovers(const Board& board, const Color& color, const square& sq)
 {
 	bitboard pawns = 0;
 	bitboard pawn_push_fst = 0;
@@ -471,7 +471,7 @@ bitboard Movegen::getPawnMovers(const Board& board, const Piece& color, const sq
 	return 0;
 }
 
-bitboard Movegen::getAttackers(const Board& board, const Piece& color, const square& sq)
+bitboard Movegen::getAttackers(const Board& board, const Color& color, const square& sq)
 {
 	bitboard attackset = 0;
 
@@ -521,7 +521,7 @@ bitboard Movegen::getAttackers(const Board& board, const Piece& color, const squ
 }
 
 // returns true if a square is attacked by any piece of a color
-bool Movegen::isAttacked(const Board& board, const Piece& color, const square& sq)
+bool Movegen::isAttacked(const Board& board, const Color& color, const square& sq)
 {
 	bitboard attacks = 0;
 
@@ -558,14 +558,14 @@ bool Movegen::isAttacked(const Board& board, const Piece& color, const square& s
 	return false;
 }
 
-bool Movegen::isInCheck(const Board& board, const Piece& color)
+bool Movegen::isInCheck(const Board& board, const Color& color)
 {
 	assert(board.getKings(color));
 	square king_sq = bitScanForward(board.getKings(color));
 	return isAttacked(board,color,king_sq);
 }
 
-bitboard Movegen::pinnedPieces(const Board& board, const Piece& color)
+bitboard Movegen::pinnedPieces(const Board& board, const Color& color)
 {
 	bitboard king = board.getKings(color);
 	square king_sq = pop_lsb(king);

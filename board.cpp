@@ -52,7 +52,7 @@ bool Board::checkIntegrity()
 	return true;
 }
 
-void Board::checkEnPassant(const square& from, const square& to, const Piece& piece, const Piece& color)
+void Board::checkEnPassant(const square& from, const square& to, const Piece& piece, const Color& color)
 {
 	if(piece == PAWN){
 		if(color == WHITE){
@@ -84,7 +84,7 @@ void Board::checkEnPassant(const square& from, const square& to, const Piece& pi
 }
 
 // must be called at the end of makemove, so changes to the rook position are already done
-void Board::updateCastlingRights(const Move& move, const Piece& color)
+void Board::updateCastlingRights(const Move& move, const Color& color)
 {
 	if(castling_rights[WKINGSIDE] || castling_rights[WQUEENSIDE]
 		|| castling_rights[BKINGSIDE] || castling_rights[BQUEENSIDE])
@@ -139,7 +139,7 @@ void Board::updateCastlingRights(const Move& move, const Piece& color)
 	}
 }
 
-void Board::makeMove(const Move& move, const Piece& color)
+void Board::makeMove(const Move& move, const Color& color)
 {
 	assert(move!=NULLMOVE);
 
@@ -207,7 +207,7 @@ void Board::makeMove(const Move& move, const Piece& color)
 }
 
 //TODO: implement
-void Board::makePromotionMove(const Move& move, const Piece& color, Moverecord& record)
+void Board::makePromotionMove(const Move& move, const Color& color, Moverecord& record)
 {
 	Piece piece = PAWN;
 	Piece promotion = (Piece)extractPromotion(move);
@@ -240,7 +240,7 @@ void Board::makePromotionMove(const Move& move, const Piece& color, Moverecord& 
 	}
 }
 
-void Board::makeCastleMove(const Move& move, const Piece& color, Moverecord& record)
+void Board::makeCastleMove(const Move& move, const Color& color, Moverecord& record)
 {
 	record.move = move;
 	record.capture = EMPTY;
@@ -294,7 +294,7 @@ void Board::makeCastleMove(const Move& move, const Piece& color, Moverecord& rec
 
 }
 
-void Board::makeEPMove(const Move& move, const Piece& color, Moverecord& record)
+void Board::makeEPMove(const Move& move, const Color& color, Moverecord& record)
 {
 	record.move = move;
 	record.capture = PAWN;
