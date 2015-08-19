@@ -122,8 +122,7 @@ int Evaluate::material(const Board& board, const Color& color)
 
 int Evaluate::mobility(const Board& board, const Color& color)
 {
-	int mob = 0;
-	return mob;
+	return 0;
 }
 
 int Evaluate::piecePosition(bitboard& pieces, const Color& color,const Piece& type)
@@ -174,7 +173,11 @@ int Evaluate::evaluatePos(const Board& board)
 	score += material(board,board.us) - material(board, board.them);
 	score += mobility(board,board.us) - mobility(board,board.them);
 	score += position(board,board.us);
-	score += board.isCheck * 200;
-	return score;
+
+	int multiplier = 1;
+	if(board.us == BLACK){
+		multiplier = -1;
+	}
+	return score * multiplier;
 }
 

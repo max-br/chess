@@ -170,13 +170,36 @@ void divideDebug(Board& board, Movegen& movegen, const Color& color, int depth)
 	compareDivide(div_res, div_in);
 }
 
+int negaMax(Board& board, Movegen& movegen, Evaluate& eval, int depth,Line* line_ptr){
+	Line line;
+	Movelist list;
+
+	if(depth == 0) {
+		return eval.evaluatePos(board);
+	}
+	int max  = -1000000;
+	movegen.genAllMoves(list);
+
+	for (int i = 0; i < list.count;++i)  {
+		if(board.makeMove(list.moves[i])){
+			int score = -negaMax(board,movegen, eval,depth - 1, &line);
+			if(score > max){
+				max = score;
+	            line_ptr->moves[0] = list.moves[i];
+	            memcpy(line_ptr->moves + 1, line.moves, line.movecount * sizeof(Move));
+	            line_ptr->movecount = line.movecount + 1;
+			}
+		}
+		board.unmakeMove();
+	}
+	return max;
+}
 
 int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alpha, int beta, Line* line_ptr) {
     Line line;
     Movelist list;
 
     if (depth == 0) {
-    	//line_ptr->movecount = 0;
         return eval.evaluatePos(board);
     }
 
@@ -200,18 +223,12 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
 }
 
 
-Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, const Color& color, int depth)
+Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, int depth)
 {
 	Line a;
 	Line* line = &a;
-	alphaBeta(board,movegen,eval,depth,-10000000,10000000,line);
-
-
-	for(int i = 0; i < line->movecount;i++){
-		cout << i;
-		board.printMove(line->moves[i]);
-	}
-	cout << endl;
+	negaMax(board,movegen,eval,depth,line);
+	//alphaBeta(board,movegen,eval,depth,-1000000,1000000,line);
 	return line->moves[0];
 }
 
@@ -269,11 +286,11 @@ void parseCommand(Board& board, Movegen& movegen, Evaluate& eval, const string& 
 		}
 		if(word == "go"){
 			command >> word;
-			int depth = 6;
+			int depth = 5;
 			if(word == "depth"){
 				command >> depth;
 			}
-			Move bestmove = searchMove(board,movegen,eval,board.us,depth);
+			Move bestmove = searchMove(board,movegen,eval,depth);
 			sendMove(board, bestmove);
 		}
 		if(word == "quit"){
