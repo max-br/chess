@@ -26,6 +26,7 @@ public:
 	Move castle_moves[4];
 
 	bool castling_rights[4];
+	bool isCheck;
 	int fullmove_number, halfmove_number;
 
 	Color us,them;
@@ -65,7 +66,7 @@ public:
 	void makeCastleMove(const Move& move, Moverecord& record);
 	void makePromotionMove(const Move& move, Moverecord& record);
 	void makeEPMove(const Move& move, Moverecord& record);
-	void makeMove(const Move& move);
+	int makeMove(const Move& move);
 
 	void unmakeCastleMove(const Moverecord& lastmove);
 	void unmakeEPMove(const Moverecord& lastmove);
