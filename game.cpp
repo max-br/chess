@@ -202,7 +202,7 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
     Movelist list;
 
     if (depth == 0) {
-    	//line_ptr->movecount = 0;
+    	line_ptr->movecount = 0;
         return eval.evaluatePos(board);
     }
 
