@@ -12,6 +12,9 @@ class Board
 
 public:
 
+	bitboard king_moves[64];
+	bitboard knight_moves[64];
+
 	bitboard piece_BB[PIECE_BB_SIZE];
 	bitboard square_mask[64];
 	Piece squares[64];
@@ -54,8 +57,10 @@ public:
 	void checkEnPassant(const square& from, const square& to, const Piece& piece, const Color& color);
 	void checkLegalCastles(const Piece& color);
 
+	bitboard isAttacked(const Color& color, const square& sq);
 	bool isInCheck(const Color& color);
-
+	bitboard initKingMoves(const square& sq);
+	bitboard initKnightMoves(const square& sq);
 
 	void makeCastleMove(const Move& move, Moverecord& record);
 	void makePromotionMove(const Move& move, Moverecord& record);

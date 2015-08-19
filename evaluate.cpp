@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 
+#include "bitfunc.h"
 #include "evaluate.h"
 #include "types.h"
 

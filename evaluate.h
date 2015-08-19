@@ -10,9 +10,6 @@
 #ifndef EVALUATE_H_
 #define EVALUATE_H_
 
-extern int popCount (bitboard x);
-extern int pop_lsb(bitboard &bb);
-
 class Evaluate {
 public:
 	Evaluate();

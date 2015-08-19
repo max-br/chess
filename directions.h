@@ -4,9 +4,9 @@
  *  Created on: Mar 8, 2015
  *      Author: max
  */
-
 #ifndef SRC_DIRECTIONS_H_
 #define SRC_DIRECTIONS_H_
+
 #include "types.h"
 
 
@@ -40,15 +40,15 @@
 
 
 
-bitboard soutOne (bitboard b) {return  b >> 8;}
-bitboard nortOne (bitboard b) {return  b << 8;}
+inline bitboard soutOne (bitboard b) {return  b >> 8;}
+inline bitboard nortOne (bitboard b) {return  b << 8;}
 
-bitboard eastOne (bitboard bb) {return (bb << 1) & CLEAR_FILE_A;}
-bitboard noEaOne (bitboard bb) {return (bb << 9) & CLEAR_FILE_A;}
-bitboard soEaOne (bitboard bb) {return (bb >> 7) & CLEAR_FILE_A;}
-bitboard westOne (bitboard bb) {return (bb >> 1) & CLEAR_FILE_H;}
-bitboard soWeOne (bitboard bb) {return (bb >> 9) & CLEAR_FILE_H;}
-bitboard noWeOne (bitboard bb) {return (bb << 7) & CLEAR_FILE_H;}
+inline bitboard eastOne (bitboard bb) {return (bb << 1) & CLEAR_FILE_A;}
+inline bitboard noEaOne (bitboard bb) {return (bb << 9) & CLEAR_FILE_A;}
+inline bitboard soEaOne (bitboard bb) {return (bb >> 7) & CLEAR_FILE_A;}
+inline bitboard westOne (bitboard bb) {return (bb >> 1) & CLEAR_FILE_H;}
+inline bitboard soWeOne (bitboard bb) {return (bb >> 9) & CLEAR_FILE_H;}
+inline bitboard noWeOne (bitboard bb) {return (bb << 7) & CLEAR_FILE_H;}
 
 
 

@@ -13,7 +13,7 @@
 #include "types.h"
 
 
-extern int popCount (bitboard bb) {
+static inline int popCount (bitboard bb) {
    int count = 0;
    while (bb) {
        count++;
@@ -35,14 +35,14 @@ static inline unsigned char _BitScanForward64(unsigned long* Index, bitboard Mas
     return Mask?1:0;
 }
 
-extern int bitScanForward(bitboard bb) {
+static inline int bitScanForward(bitboard bb) {
    unsigned long index;
    assert (bb != 0);
    _BitScanForward64(&index, bb);
    return (int) index;
 }
 
-extern int pop_lsb(bitboard &bb) {
+static inline int pop_lsb(bitboard &bb) {
 	assert (bb != 0);
     int idx = bitScanForward(bb);
     bb &= bb - 1; // reset bit outside

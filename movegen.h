@@ -13,8 +13,6 @@ class Movegen
 {
 public:
 	Board* board;
-	bitboard king_moves[64];
-	bitboard knight_moves[64];
 	bitboard between[64][64];
 
 	bitboard pinned_pieces;
@@ -44,9 +42,6 @@ public:
 	void genKnightMoves(Movelist& list);
 	void genRookMoves(Movelist& list);
 	void genQueenMoves(Movelist& list);
-
-	bool isAttacked(const Color& color, const square& sq);
-	bool isInCheck(const Color& color);
 
 	bitboard pinnedPieces(const Color& color);
 

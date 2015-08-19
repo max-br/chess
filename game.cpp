@@ -27,7 +27,7 @@ uint64_t perft(Board& board, Movegen& movegen,int depth)
 
     for (int i = 0; i < movelist.count; i++) {
     	board.makeMove(movelist.moves[i]);
-    	if(!movegen.isInCheck(board.them)){
+    	if(!board.isInCheck(board.them)){
     		nodes += perft(board,movegen,depth - 1);
     	}
         board.unmakeMove();
@@ -56,7 +56,7 @@ vector<string> divide(Board& board, Movegen& movegen,int depth)
     for (int i = 0; i < movelist.count; i++) {
     	string movestring;
     	board.makeMove(movelist.moves[i]);
-    	if(!movegen.isInCheck(board.them)){
+    	if(!board.isInCheck(board.them)){
     		int perft_tmp = perft(board,movegen,depth - 1);
     		perft_cnt += perft_tmp;
 
@@ -185,7 +185,7 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
     int val = 0;
     for (int i = 0; i < list.count;++i)  {
     	board.makeMove(list.moves[i]);
-    	if(!movegen.isInCheck(board.them)){
+    	if(!board.isInCheck(board.them)){
             val = -alphaBeta(board,movegen,eval,depth - 1, -beta, -alpha, &line);
     	}
     	board.unmakeMove();

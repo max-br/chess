@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bitfunc.h"
 #include "board.h"
-
+#include "directions.h"
+#include "magicmoves.h"
 
 Board::Board()
 {
@@ -20,6 +22,8 @@ Board::Board()
 
 	for(square i = 0; i != 64; ++i){
 		square_mask[i] = ((bitboard)1 << (i));
+		king_moves[i] = initKingMoves(i);
+		knight_moves[i] = initKnightMoves(i);
 		squares[i] = EMPTY;
 	}
 	en_passant[0] = 0;
@@ -31,6 +35,29 @@ Board::Board()
 	castle_moves[BQUEENSIDE] = encodeFrom(60) | encodeTo(58) | encodePiece(KING) | encodeCapture(EMPTY) | encodePromotion(EMPTY) | encodeEP(EMPTY)| encodeMovetype(CASTLE);
 
 	setupFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); // starting position
+}
+
+// returns a mask of possible king moves from a square
+bitboard Board::initKingMoves(const square& sq)
+{
+	bitboard kingBB = ((bitboard)1 << (sq));
+	bitboard moves = eastOne(kingBB) | westOne(kingBB);
+	kingBB |= moves;
+	moves |= nortOne(kingBB) | soutOne(kingBB);
+	return moves;
+}
+
+// returns a mask of possible knight moves from a square
+bitboard Board::initKnightMoves(const square& sq)
+{
+	bitboard knightBB = ((bitboard)1 << (sq));
+	bitboard l1 = (knightBB >> 1) & CLEAR_FILE_H;
+	bitboard l2 = (knightBB >> 2) & CLEAR_FILE_G_H;
+	bitboard r1 = (knightBB << 1) & CLEAR_FILE_A;
+	bitboard r2 = (knightBB << 2) & CLEAR_FILE_A_B;
+	bitboard h1 = l1 | r1;
+	bitboard h2 = l2 | r2;
+	return (h1<<16) | (h1>>16) | (h2<<8) | (h2>>8);
 }
 
 bool Board::checkIntegrity()
@@ -74,6 +101,39 @@ void Board::checkEnPassant(const square& from, const square& to, const Piece& pi
 }
 
 bitboard Board::isAttacked(const Color& color, const square& sq){
+	bitboard attacks = 0;
+
+	if(color == BLACK){
+		bitboard white_pawn_left_attack = (getPawns(WHITE) & CLEAR_FILE_A) << NOWE;
+		bitboard white_pawn_right_attack = (getPawns(WHITE) & CLEAR_FILE_H) << NOEA;
+		if(square_mask[sq] & (white_pawn_left_attack | white_pawn_right_attack)){
+			return true;
+		}
+	}
+	if(color == WHITE){
+		bitboard black_pawn_left_attack = (getPawns(BLACK) & CLEAR_FILE_A) >> SOWE;
+		bitboard black_pawn_right_attack = (getPawns(BLACK) & CLEAR_FILE_H) >> SOEA;
+		if(square_mask[sq] & (black_pawn_left_attack | black_pawn_right_attack)){
+			return true;
+		}
+	}
+
+	if(knight_moves[sq] & getKnights(flipColor(color))){
+		return true;
+	}
+
+	attacks = Bmagic(sq, getAllPieces()) & ~getAllPieces(color);
+	if(attacks & (getBishops(flipColor(color)) | getQueens(flipColor(color)))){
+		return true;
+	}
+	attacks = Rmagic(sq, getAllPieces()) & ~getAllPieces(color);
+	if(attacks & (getRooks(flipColor(color)) | getQueens(flipColor(color)))){
+		return true;
+	}
+	if(king_moves[sq] & getKings(flipColor(color))){
+		return true;
+	}
+	return false;
 
 }
 
