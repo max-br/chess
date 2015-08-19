@@ -265,6 +265,7 @@ bool Board::makeMove(const Move& move)
 		assert(checkIntegrity());
 		return false;
 	}
+
 	inCheck = isInCheck(them);
 
 	updateCastlingRights(move, us);

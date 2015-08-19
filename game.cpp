@@ -188,7 +188,7 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int ply,
     movegen.genAllMoves(list);
 
     if(list.count == 0){
-    	if(board.isInCheck(board.us)){
+    	if(board.inCheck){
     		return -32000 + ply; //mate
     	}else {
     		return 0; //stalemate
@@ -220,6 +220,38 @@ Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, int depth)
 	Line line;
 	alphaBeta(board,movegen,eval,depth,0,-INFINITE,INFINITE,&line);
 	return line.moves[0];
+}
+
+void profile()
+{
+	Board board;
+	Evaluate eval;
+	Movelist list;
+	Movegen movegen = Movegen(&board);
+
+	board.setupFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); // starting position
+	board.printBoard();
+	cout << searchMove(board,movegen,eval,6) << endl;
+
+	board.setupFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+	board.printBoard();
+	cout << searchMove(board,movegen,eval,6) << endl;
+
+	board.setupFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
+	board.printBoard();
+	cout << searchMove(board,movegen,eval,6) << endl;
+
+	board.setupFEN("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+	board.printBoard();
+	cout << searchMove(board,movegen,eval,6) << endl;
+
+	board.setupFEN("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
+	board.printBoard();
+	cout << searchMove(board,movegen,eval,5) << endl;
+
+	board.setupFEN("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
+	board.printBoard();
+	cout << searchMove(board,movegen,eval,6) << endl;
 }
 
 string getCommand()
@@ -311,9 +343,10 @@ int main()
 	Movelist list;
 	Movegen movegen = Movegen(&board);
 
-	//runTests();
+	//profile();
+	runTests();
 
-	startUci(board,movegen,eval);
+	//startUci(board,movegen,eval);
 
 	return 0;
 }
