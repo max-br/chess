@@ -173,11 +173,6 @@ int Evaluate::evaluatePos(const Board& board)
 	score += material(board,board.us) - material(board, board.them);
 	score += mobility(board,board.us) - mobility(board,board.them);
 	score += position(board,board.us);
-
-	int multiplier = 1;
-	if(board.us == BLACK){
-		multiplier = -1;
-	}
-	return score * multiplier;
+	return score;
 }
 

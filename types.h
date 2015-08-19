@@ -24,6 +24,8 @@ class Board;
  *	30-31		none
 */
 typedef unsigned int Move;
+
+#define INFINITE 32000
 #define NULLMOVE 0
 #define EMPTYBOARD 0
 

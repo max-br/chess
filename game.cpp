@@ -170,36 +170,15 @@ void divideDebug(Board& board, Movegen& movegen, const Color& color, int depth)
 	compareDivide(div_res, div_in);
 }
 
-int negaMax(Board& board, Movegen& movegen, Evaluate& eval, int depth,Line* line_ptr){
-	Line line;
-	Movelist list;
-
-	if(depth == 0) {
-		return eval.evaluatePos(board);
-	}
-	int max  = -1000000;
-	movegen.genAllMoves(list);
-
-	for (int i = 0; i < list.count;++i)  {
-		if(board.makeMove(list.moves[i])){
-			int score = -negaMax(board,movegen, eval,depth - 1, &line);
-			if(score > max){
-				max = score;
-	            line_ptr->moves[0] = list.moves[i];
-	            memcpy(line_ptr->moves + 1, line.moves, line.movecount * sizeof(Move));
-	            line_ptr->movecount = line.movecount + 1;
-			}
-		}
-		board.unmakeMove();
-	}
-	return max;
-}
-
-int val = 0;
-
-int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alpha, int beta, Line* line_ptr) {
+int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int ply, int alpha, int beta, Line* line_ptr) {
     Line line;
     Movelist list;
+
+    assert(-INFINITE <= alpha && alpha < beta && beta <= INFINITE);
+
+    if(board.inCheck && depth == 0){
+    	depth++;
+    }
 
     if (depth == 0) {
     	line_ptr->movecount = 0;
@@ -207,10 +186,19 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
     }
 
     movegen.genAllMoves(list);
+
+    if(list.count == 0){
+    	if(board.isInCheck(board.us)){
+    		return -32000 + ply; //mate
+    	}else {
+    		return 0; //stalemate
+    	}
+    }
+
     for (int i = 0; i < list.count;++i)  {
     	// only consider legal moves
     	if(board.makeMove(list.moves[i])){
-            val = -alphaBeta(board,movegen,eval,depth - 1, -beta, -alpha, &line);
+            int val = -alphaBeta(board,movegen,eval,depth - 1, ply + 1, -beta, -alpha, &line);
             board.unmakeMove();
             if (val >= beta) return beta;
             if (val > alpha) {
@@ -230,8 +218,7 @@ int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int alph
 Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, int depth)
 {
 	Line line;
-	//negaMax(board,movegen,eval,depth,line);
-	alphaBeta(board,movegen,eval,depth,-32000,32000,&line);
+	alphaBeta(board,movegen,eval,depth,0,-INFINITE,INFINITE,&line);
 	return line.moves[0];
 }
 
@@ -289,7 +276,7 @@ void parseCommand(Board& board, Movegen& movegen, Evaluate& eval, const string& 
 		}
 		if(word == "go"){
 			command >> word;
-			int depth = 5;
+			int depth = 6;
 			if(word == "depth"){
 				command >> depth;
 			}
