@@ -19,10 +19,8 @@ int main()
 	Search search(&board, &eval, &movegen);
 	Uci uci(&board, &search);
 
-	//profile();
-
 	Test test;
-	test.runTests();
+	test.perftTests();
 
 	//uci.start();
 

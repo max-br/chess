@@ -26,7 +26,7 @@ public:
 	//std::vector<std::string> divide(Board& board,Movegen& movegen,int depth);
 
 	void profile();
-	void runTests();
+	void perftTests();
 };
 
 #endif /* SRC_TEST_H_ */

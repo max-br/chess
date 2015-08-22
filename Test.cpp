@@ -85,7 +85,7 @@ vector<string> Benchmark::divide(Board& board, Movegen& movegen,int depth)
     return ret;
 }*/
 
-void Test::runTests()
+void Test::perftTests()
 {
 	Board board;
 	Movegen movegen = Movegen(&board);
