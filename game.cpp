@@ -10,7 +10,8 @@
 #include "board.h"
 #include "movegen.h"
 #include "evaluate.h"
-#include "search.h"
+#include "Search.h"
+#include "Uci.h"
 
 #include "types.h"
 
@@ -170,88 +171,37 @@ void divideDebug(Board& board, Movegen& movegen, const Color& color, int depth)
 	compareDivide(div_res, div_in);
 }
 
-int alphaBeta(Board& board, Movegen& movegen, Evaluate& eval,int depth, int ply, int alpha, int beta, Line* line_ptr) {
-    Line line;
-    Movelist list;
-
-    assert(-INFINITE <= alpha && alpha < beta && beta <= INFINITE);
-
-    if(board.inCheck && depth == 0){
-    	depth++;
-    }
-
-    if (depth == 0) {
-    	line_ptr->movecount = 0;
-        return eval.evaluatePos(board);
-    }
-
-    movegen.genAllMoves(list);
-
-    if(list.count == 0){
-    	if(board.inCheck){
-    		return -32000 + ply; //mate
-    	}else {
-    		return 0; //stalemate
-    	}
-    }
-
-    for (int i = 0; i < list.count;++i)  {
-    	// only consider legal moves
-    	if(board.makeMove(list.moves[i])){
-            int val = -alphaBeta(board,movegen,eval,depth - 1, ply + 1, -beta, -alpha, &line);
-            board.unmakeMove();
-            if (val >= beta) return beta;
-            if (val > alpha) {
-                alpha = val;
-                line_ptr->moves[0] = list.moves[i];
-                memcpy(line_ptr->moves + 1, line.moves, line.movecount * sizeof(Move));
-                line_ptr->movecount = line.movecount + 1;
-            }
-    	}else{
-    		board.unmakeMove();
-    	}
-    }
-    return alpha;
-}
-
-
-Move searchMove(Board& board, Movegen& movegen, Evaluate& eval, int depth)
-{
-	Line line;
-	alphaBeta(board,movegen,eval,depth,0,-INFINITE,INFINITE,&line);
-	return line.moves[0];
-}
-
 void profile()
 {
 	Board board;
 	Evaluate eval;
 	Movelist list;
 	Movegen movegen = Movegen(&board);
+	Search search(&board, &eval, &movegen);
 
 	board.setupFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); // starting position
 	board.printBoard();
-	cout << searchMove(board,movegen,eval,6) << endl;
+	cout << search.bestMove(6) << endl;
 
 	board.setupFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
 	board.printBoard();
-	cout << searchMove(board,movegen,eval,6) << endl;
+	cout << search.bestMove(6) << endl;
 
 	board.setupFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
 	board.printBoard();
-	cout << searchMove(board,movegen,eval,6) << endl;
+	cout << search.bestMove(6) << endl;
 
 	board.setupFEN("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
 	board.printBoard();
-	cout << searchMove(board,movegen,eval,6) << endl;
+	cout << search.bestMove(6) << endl;
 
 	board.setupFEN("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
 	board.printBoard();
-	cout << searchMove(board,movegen,eval,5) << endl;
+	cout << search.bestMove(6) << endl;
 
 	board.setupFEN("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
 	board.printBoard();
-	cout << searchMove(board,movegen,eval,6) << endl;
+	cout << search.bestMove(6) << endl;
 }
 
 string getCommand()
@@ -261,80 +211,6 @@ string getCommand()
 	return input;
 }
 
-void sendCommand(const string& cmd)
-{
-	cout << cmd << endl;
-}
-
-void sendMove(Board& board,const Move& move)
-{
-	string movestring = "bestmove ";
-	movestring += board.moveNotation(move);
-	sendCommand(movestring);
-}
-
-void parseCommand(Board& board, Movegen& movegen, Evaluate& eval, const string& cmd_string)
-{
-
-	stringstream command;
-	command << cmd_string;
-	string word;
-	while(command >> word)
-	{
-		if(word == "uci"){
-			sendCommand("Chess 0.1 by Max Breitenfeldt");
-			sendCommand("id name Chess 0.1");
-			sendCommand("id author Max Breitenfeldt");
-			sendCommand("uciok");
-		}
-		if(word == "isready"){
-			sendCommand("readyok");
-		}
-		if(word == "position"){
-			string next_word;
-			string fen;
-			while (command >> next_word){
-				if(next_word == "fen"){
-					command.get();
-					getline(command, fen);
-				}
-				if(next_word == "startpos"){
-					fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-				}
-
-			}
-			board.setupFEN(fen);
-			board.printBoard();
-		}
-		if(word == "go"){
-			command >> word;
-			int depth = 6;
-			if(word == "depth"){
-				command >> depth;
-			}
-			Move bestmove = searchMove(board,movegen,eval,depth);
-			sendMove(board, bestmove);
-		}
-		if(word == "quit"){
-			return;
-		}
-	}
-}
-
-void startUci(Board& board, Movegen& movegen, Evaluate& eval)
-{
-	while(1){
-		string input;
-		getline(cin, input);
-		if(!input.empty()){
-			parseCommand(board,movegen,eval,input);
-		}
-		if(input == "quit"){
-			break;
-		}
-		usleep(100);
-	}
-}
 
 int main()
 {
@@ -342,11 +218,13 @@ int main()
 	Evaluate eval;
 	Movelist list;
 	Movegen movegen = Movegen(&board);
+	Search search(&board, &eval, &movegen);
+	Uci uci(&board, &search);
 
 	//profile();
-	runTests();
+	//runTests();
 
-	//startUci(board,movegen,eval);
+	uci.start();
 
 	return 0;
 }

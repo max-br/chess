@@ -22,13 +22,12 @@ public:
 
 	void initValueTables();
 
-	int evaluatePos(const Board& board);
+	int evaluatePos(const Board* board);
 	int piecePosition(bitboard& pieces, const Color& color,const Piece& type);
 
 
-	int material(const Board& board, const Color& color);
-	int mobility(const Board& board, const Color& color);
-	int position(const Board& board, const Color& color);
+	int material(const Board* board, const Color& color);
+	int position(const Board* board, const Color& color);
 
 };
 

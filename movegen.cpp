@@ -98,10 +98,10 @@ void Movegen::genAllMoves(Movelist& list)
 		}else{
 			genBlackPawnMoves(list);
 		}
+		genQueenMoves(list);
+		genRookMoves(list);
 		genBishopMoves(list);
 		genKnightMoves(list);
-		genRookMoves(list);
-		genQueenMoves(list);
 		genKingMoves(list);
 		genCastles(list);
 		//add en passants

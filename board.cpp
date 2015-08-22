@@ -260,7 +260,6 @@ bool Board::makeMove(const Move& move)
 
 	// check for illegal moves
 	if(isInCheck(us)){
-		updateCastlingRights(move, us);
 		switchColor();
 		assert(checkIntegrity());
 		return false;

@@ -109,20 +109,15 @@ void Evaluate::initValueTables()
 // Evaluates material on a Board
 // Value:
 // 3P < N < B < R < Q
-int Evaluate::material(const Board& board, const Color& color)
+int Evaluate::material(const Board* board, const Color& color)
 {
 	int mat = 0;
-	mat += popCount(board.getPawns(color)) * 100;
-	mat += popCount(board.getKnights(color)) * 320;
-	mat += popCount(board.getBishops(color)) * 330;
-	mat += popCount(board.getRooks(color)) * 500;
-	mat += popCount(board.getQueens(color)) * 900;
+	mat += popCount(board->getPawns(color)) * 100;
+	mat += popCount(board->getKnights(color)) * 320;
+	mat += popCount(board->getBishops(color)) * 330;
+	mat += popCount(board->getRooks(color)) * 500;
+	mat += popCount(board->getQueens(color)) * 900;
 	return mat;
-}
-
-int Evaluate::mobility(const Board& board, const Color& color)
-{
-	return 0;
 }
 
 int Evaluate::piecePosition(bitboard& pieces, const Color& color,const Piece& type)
@@ -144,35 +139,34 @@ int Evaluate::piecePosition(bitboard& pieces, const Color& color,const Piece& ty
 
 }
 
-int Evaluate::position(const Board& board, const Color& color)
+int Evaluate::position(const Board* board, const Color& color)
 {
 	int pos = 0;
-	bitboard piece_bb = board.getPawns(color);
+	bitboard piece_bb = board->getPawns(color);
 	pos += piecePosition(piece_bb,color,PAWN);
 
-	piece_bb = board.getKnights(color);
+	piece_bb = board->getKnights(color);
 	pos += piecePosition(piece_bb,color,KNIGHT);
 
-	piece_bb = board.getBishops(color);
+	piece_bb = board->getBishops(color);
 	pos += piecePosition(piece_bb,color,BISHOP);
 
-	piece_bb = board.getRooks(color);
+	piece_bb = board->getRooks(color);
 	pos += piecePosition(piece_bb,color,ROOK);
 
-	piece_bb = board.getQueens(color);
+	piece_bb = board->getQueens(color);
 	pos += piecePosition(piece_bb,color,QUEEN);
 
-	piece_bb = board.getKings(color);
+	piece_bb = board->getKings(color);
 	pos += piecePosition(piece_bb,color,KING);
 	return pos;
 }
 
-int Evaluate::evaluatePos(const Board& board)
+int Evaluate::evaluatePos(const Board* board)
 {
 	int score = 0;
-	score += material(board,board.us) - material(board, board.them);
-	score += mobility(board,board.us) - mobility(board,board.them);
-	score += position(board,board.us);
+	score += material(board,board->us) - material(board, board->them);
+	score += position(board,board->us);
 	return score;
 }
 
