@@ -14,7 +14,6 @@
 #include "types.h"
 
 Evaluate::Evaluate() {
-	// TODO Auto-generated constructor stub
 	square_value_init[PAWN] =   "0 0 0 0 0 0 0 0 "
 								"50 50 50 50 50 50 50 50 "
 								"10 10 20 30 30 20 10 10 "

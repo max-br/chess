@@ -11,6 +11,7 @@
 #include "Evaluate.h"
 #include "Movegen.h"
 #include "Search.h"
+#include "Stringer.h"
 #include "Uci.h"
 
 #include "types.h"
@@ -46,6 +47,7 @@ uint64_t timePerft(Board& board, Movegen& movegen, int depth)
 	return nodes;
 }
 
+/*
 vector<string> divide(Board& board, Movegen& movegen,int depth)
 {
     Movelist movelist;
@@ -83,7 +85,7 @@ vector<string> divideInput()
 	return ret;
 }
 
-//TODO ADD MORE TESTS
+
 void runTests()
 {
 	Board board;
@@ -164,12 +166,14 @@ void compareDivide(vector<string> div1,vector<string> div2)
 	}
 }
 
+
 void divideDebug(Board& board, Movegen& movegen, const Color& color, int depth)
 {
 	vector<string> div_res = divide(board,movegen,depth);
 	vector<string> div_in = divideInput();
 	compareDivide(div_res, div_in);
 }
+
 
 void profile()
 {
@@ -202,7 +206,7 @@ void profile()
 	board.setupFEN("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
 	board.printBoard();
 	cout << search.bestMove(6) << endl;
-}
+}*/
 
 string getCommand()
 {
@@ -219,7 +223,8 @@ int main()
 	Movelist list;
 	Movegen movegen = Movegen(&board);
 	Search search(&board, &eval, &movegen);
-	Uci uci(&board, &search);
+	Stringer stringer(&board);
+	Uci uci(&board, &search, &stringer);
 
 	//profile();
 	//runTests();

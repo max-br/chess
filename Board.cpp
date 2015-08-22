@@ -63,7 +63,6 @@ bitboard Board::initKnightMoves(const square& sq)
 bool Board::checkIntegrity()
 {
 	if(getAllPieces() & ~getPawns() & ~getBishops() & ~getKnights() & ~ getRooks() & ~getQueens() & ~getKings()){
-		printDebug();
 		return false;
 	}
 	return true;
@@ -274,7 +273,6 @@ bool Board::makeMove(const Move& move)
 	return true;
 }
 
-//TODO: implement
 void Board::makePromotionMove(const Move& move, Moverecord& record)
 {
 	Piece piece = PAWN;
@@ -719,132 +717,10 @@ void Board::setupFEN(const std::string fen){
 	}
 }
 
-// Iterates through the bits of a bitboard and puts in the outputstring if there is a match
-void Board::parseBB(bitboard bb,const char figure, char* output) const{
-	std::bitset<64> bset(bb);
-	for(size_t i = 0; i < bset.size(); ++i){
-		if(bset[i]){
-			output[i] = figure;
-		}
-	}
-}
-
 void Board::switchColor(){
 	Color tmp = us;
 	us = them;
 	them = tmp;
 }
 
-
-// parses bitboards to string and prints
-void Board::printBoard() const{
-	char boardstring[64];
-	memset(boardstring, '0',64);
-
-	parseBB(getPawns(WHITE), 'P', boardstring);
-	parseBB(getKnights(WHITE), 'N', boardstring);
-	parseBB(getBishops(WHITE), 'B', boardstring);
-	parseBB(getRooks(WHITE), 'R', boardstring);
-	parseBB(getQueens(WHITE), 'Q',boardstring);
-	parseBB(getKings(WHITE), 'K', boardstring);
-
-	parseBB(getPawns(BLACK), 'p', boardstring);
-	parseBB(getKnights(BLACK), 'n', boardstring);
-	parseBB(getBishops(BLACK), 'b', boardstring);
-	parseBB(getRooks(BLACK), 'r', boardstring);
-	parseBB(getQueens(BLACK), 'q',boardstring);
-	parseBB(getKings(BLACK), 'k', boardstring);
-
-	// endl every 8 chars, prints in reverse to correct orientation
-	for(int i = 7; i > -1; --i){
-		for(int j = 0; j != 8; ++j){
-			std::cout << boardstring[i*8+j];
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-}
-
-void Board::printDebug() const
-{
-	for(int i = 1; i != PIECE_BB_SIZE; ++i){
-		std::cout << "Piecetype: " << i << ": " << piece_BB[i] << std::endl;
-		printBB(piece_BB[i]);
-	}
-	std::cout << std::endl;
-
-	for(int line = 7; line >= 0; --line){
-		for(int row = 0; row != 8; ++row){
-			square sq = line*8+row;
-			std::cout << squares[sq];
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-	std::cout << "En passant: " << en_passant[0] << " " << en_passant[1] << std::endl;
-	std::cout << "color us: " << us << " them: " << them << std::endl;
-
-	printBoard();
-}
-
-// Prints a bitboard as a chessboard
-void Board::printBB(bitboard bb) const
-{
-	bitboard tmp = bb;
-	for(int i = 7; i > -1; --i){
-		for(int j = 0; j != 8; ++j){
-			if((tmp >> (i*8+j)) & 1){
-				std::cout << "1";
-			}else{
-				std::cout << "0";
-			}
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-}
-
-std::string Board::squareNotation(square sq)
-{
-	char letter = (sq % 8) + 97;
-	char number = (int)sq / 8 + 49;
-	std::string coord;
-	coord += letter;
-	coord += number;
-	return coord;
-}
-
-std::string Board::moveNotation(Move m)
-{
-	std::string ret;
-	if(m == NULLMOVE){
-		return "0000";
-	}
-
-	ret += squareNotation(extractFrom(m));
-	ret += squareNotation(extractTo(m));
-	ret += " ";
-
-	if(extractPromotion(m)){
-		if(extractPromotion(m) == BISHOP){
-			ret += 'b';
-		}
-		if(extractPromotion(m) == KNIGHT){
-			ret += 'k';
-		}
-		if(extractPromotion(m) == ROOK){
-			ret += 'r';
-		}
-		if(extractPromotion(m) == QUEEN){
-			ret += 'q';
-		}
-	}
-	return ret;
-}
-
-void Board::printMove(Move m) const
-{
-	std::cout << "From: " << extractFrom(m) << " To: " << extractTo(m) << " Piece: " << extractPiece(m) << " Capture: " << extractCapture(m) <<
-			" Promotion: " << extractPromotion(m) << " EP: " << extractEP(m) << "Castle: " << extractMovetype(m) << " Move: " << m << std::endl;
-}
 

@@ -79,16 +79,6 @@ public:
 	void setupFEN(const std::string fen);
 	void resetBoard();
 
-
-	void parseBB(bitboard bb,const char figure, char* output) const;
-	void printDebug() const;
-	void printBoard() const;
-	void printBB(bitboard bb) const;
-	void printMove(Move m) const;
-
-	std::string squareNotation(square sq);
-	std::string moveNotation(Move m);
-
 };
 
 #endif // #ifndef BOARD_H_INCLUDED

@@ -8,14 +8,15 @@
 #ifndef SRC_UCI_H_
 #define SRC_UCI_H_
 
-class Uci {
+class Uci
+{
 public:
+	Uci(Board* board, Search* search, Stringer* stringer);
 	virtual ~Uci();
-
-	Uci(Board* board, Search* search);
 
 	Board* board;
 	Search* search;
+	Stringer* stringer;
 
 	std::string getCommand();
 	void sendCommand(const std::string& cmd);
