@@ -11,18 +11,14 @@
 #include <string>
 #include <unistd.h>
 
-#include "Board.h"
-#include "Search.h"
-#include "Stringer.h"
+
 #include "Uci.h"
 
 using namespace std;
 
-
-Uci::Uci(Board* board, Search* search,Stringer* stringer) {
+Uci::Uci(Board* board, Search* search) {
 	this->board = board;
 	this->search = search;
-	this->stringer = stringer;
 }
 
 Uci::~Uci() {
@@ -44,7 +40,7 @@ void Uci::sendCommand(const string& cmd)
 void Uci::sendMove(const Move& move)
 {
 	string movestring = "bestmove ";
-	movestring += stringer->moveNotation(move);
+	movestring += tostring.moveNotation(move);
 	sendCommand(movestring);
 }
 
@@ -79,7 +75,7 @@ void Uci::parseCommand(const string& cmd_string)
 
 			}
 			board->setupFEN(fen);
-			stringer->printBoard();
+			tostring.print(board);
 		}
 		if(word == "go"){
 			command >> word;

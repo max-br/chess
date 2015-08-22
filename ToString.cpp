@@ -5,7 +5,7 @@
  *      Author: max
  */
 
-#include "Stringer.h"
+#include "ToString.h"
 
 #include <bitset>
 #include <iostream>
@@ -15,17 +15,16 @@
 #include "Board.h"
 #include "types.h"
 
-Stringer::Stringer(Board* board) {
-	this->board = board;
+ToString::ToString() {
 }
 
-Stringer::~Stringer() {
+ToString::~ToString() {
 	// TODO Auto-generated destructor stub
 }
 
 
 // Iterates through the bits of a bitboard and puts in the outputstring if there is a match
-void Stringer::parseBB(bitboard bb,const char figure, char* output){
+void ToString::parseBB(bitboard bb,const char figure, char* output){
 	std::bitset<64> bset(bb);
 	for(size_t i = 0; i < bset.size(); ++i){
 		if(bset[i]){
@@ -38,7 +37,36 @@ void Stringer::parseBB(bitboard bb,const char figure, char* output){
 
 
 // parses bitboards to string and prints
-void Stringer::printBoard(){
+void ToString::print(Board& board){
+	char boardstring[64];
+	memset(boardstring, '.',64);
+
+	parseBB(board.getPawns(WHITE), 'P', boardstring);
+	parseBB(board.getKnights(WHITE), 'N', boardstring);
+	parseBB(board.getBishops(WHITE), 'B', boardstring);
+	parseBB(board.getRooks(WHITE), 'R', boardstring);
+	parseBB(board.getQueens(WHITE), 'Q',boardstring);
+	parseBB(board.getKings(WHITE), 'K', boardstring);
+
+	parseBB(board.getPawns(BLACK), 'p', boardstring);
+	parseBB(board.getKnights(BLACK), 'n', boardstring);
+	parseBB(board.getBishops(BLACK), 'b', boardstring);
+	parseBB(board.getRooks(BLACK), 'r', boardstring);
+	parseBB(board.getQueens(BLACK), 'q',boardstring);
+	parseBB(board.getKings(BLACK), 'k', boardstring);
+
+	// endl every 8 chars, prints in reverse to correct orientation
+	for(int i = 7; i > -1; --i){
+		for(int j = 0; j != 8; ++j){
+			std::cout << boardstring[i*8+j] << ' ';
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+// parses bitboards to string and prints
+void ToString::print(Board* board){
 	char boardstring[64];
 	memset(boardstring, '.',64);
 
@@ -66,30 +94,31 @@ void Stringer::printBoard(){
 	std::cout << std::endl;
 }
 
-void Stringer::printDebug()
+
+void ToString::printDebug(Board& board)
 {
 	for(int i = 1; i != PIECE_BB_SIZE; ++i){
-		std::cout << "Piecetype: " << i << ": " << board->piece_BB[i] << std::endl;
-		printBB(board->piece_BB[i]);
+		std::cout << "Piecetype: " << i << ": " << board.piece_BB[i] << std::endl;
+		printBB(board.piece_BB[i]);
 	}
 	std::cout << std::endl;
 
 	for(int line = 7; line >= 0; --line){
 		for(int row = 0; row != 8; ++row){
 			square sq = line*8+row;
-			std::cout << board->squares[sq];
+			std::cout << board.squares[sq];
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	std::cout << "En passant: " << board->en_passant[0] << " " << board->en_passant[1] << std::endl;
-	std::cout << "color us: " << board->us << " them: " << board->them << std::endl;
+	std::cout << "En passant: " << board.en_passant[0] << " " << board.en_passant[1] << std::endl;
+	std::cout << "color us: " << board.us << " them: " << board.them << std::endl;
 
-	printBoard();
+	print(board);
 }
 
 // Prints a bitboard as a chessboard
-void Stringer::printBB(bitboard bb)
+void ToString::printBB(bitboard bb)
 {
 	bitboard tmp = bb;
 	for(int i = 7; i > -1; --i){
@@ -105,7 +134,7 @@ void Stringer::printBB(bitboard bb)
 	std::cout << std::endl;
 }
 
-std::string Stringer::squareNotation(square sq)
+std::string ToString::squareNotation(square sq)
 {
 	char letter = (sq % 8) + 97;
 	char number = (int)sq / 8 + 49;
@@ -115,7 +144,7 @@ std::string Stringer::squareNotation(square sq)
 	return coord;
 }
 
-std::string Stringer::moveNotation(Move m)
+std::string ToString::moveNotation(Move m)
 {
 	std::string ret;
 	if(m == NULLMOVE){
@@ -143,7 +172,7 @@ std::string Stringer::moveNotation(Move m)
 	return ret;
 }
 
-void Stringer::printMove(Move m)
+void ToString::printMove(Move m)
 {
 	std::cout << "From: " << extractFrom(m) << " To: " << extractTo(m) << " Piece: "
 			<< extractPiece(m) << " Capture: " << extractCapture(m) << " Promotion: "

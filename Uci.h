@@ -8,15 +8,19 @@
 #ifndef SRC_UCI_H_
 #define SRC_UCI_H_
 
+#include "Board.h"
+#include "Search.h"
+#include "ToString.h"
+
 class Uci
 {
 public:
-	Uci(Board* board, Search* search, Stringer* stringer);
+	Uci(Board* board, Search* search);
 	virtual ~Uci();
 
 	Board* board;
 	Search* search;
-	Stringer* stringer;
+	ToString tostring;
 
 	std::string getCommand();
 	void sendCommand(const std::string& cmd);

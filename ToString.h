@@ -5,29 +5,28 @@
  *      Author: max
  */
 
-#ifndef SRC_STRINGER_H_
-#define SRC_STRINGER_H_
+#ifndef SRC_TOSTRING_H_
+#define SRC_TOSTRING_H_
 
 #include <string>
 
 #include "types.h"
 
-class Stringer{
+class ToString{
 public:
-	Stringer();
-	Stringer(Board* board);
-	virtual ~Stringer();
+	ToString();
+	virtual ~ToString();
 
-	Board* board;
 
 	void parseBB(bitboard bb,const char figure, char* output);
 	void printBB(bitboard bb);
-	void printBoard();
-	void printDebug();
+	void print(Board& board);
+	void print(Board* board);
+	void printDebug(Board& board);
 	std::string squareNotation(square sq);
 	std::string moveNotation(Move m);
 	void printMove(Move m);
 
 };
 
-#endif /* SRC_STRINGER_H_ */
+#endif /* SRC_TOSTRING_H_ */
