@@ -10,7 +10,7 @@
 #include <sstream>
 
 #include "bitfunc.h"
-#include "evaluate.h"
+#include "Evaluate.h"
 #include "types.h"
 
 Evaluate::Evaluate() {

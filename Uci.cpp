@@ -11,9 +11,9 @@
 #include <string>
 #include <unistd.h>
 
-#include "board.h"
 #include "Search.h"
 #include "Uci.h"
+#include "Board.h"
 
 using namespace std;
 

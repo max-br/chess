@@ -8,10 +8,11 @@
 #include <assert.h>
 #include <string.h>
 
-#include "board.h"
-#include "evaluate.h"
-#include "movegen.h"
 #include "Search.h"
+
+#include "Board.h"
+#include "Evaluate.h"
+#include "Movegen.h"
 #include "types.h"
 
 Search::Search(Board* board,Evaluate* eval, Movegen* movegen){

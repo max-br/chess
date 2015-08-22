@@ -1,10 +1,11 @@
+#include "Movegen.h"
+
 #include <assert.h>
 #include <iostream>
 #include <stdlib.h>
 
 #include "bitfunc.h"
-#include "board.h"
-#include "movegen.h"
+#include "Board.h"
 #include "directions.h"
 
 // ctor

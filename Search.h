@@ -8,9 +8,9 @@
 #ifndef SRC_SEARCH_H_
 #define SRC_SEARCH_H_
 
+#include "Evaluate.h"
+#include "Movegen.h"
 #include "types.h"
-#include "evaluate.h"
-#include "movegen.h"
 
 class Search {
 public:

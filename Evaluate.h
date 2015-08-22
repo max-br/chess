@@ -5,7 +5,7 @@
  *      Author: max
  */
 
-#include "board.h"
+#include "Board.h"
 
 #ifndef EVALUATE_H_
 #define EVALUATE_H_

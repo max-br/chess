@@ -7,9 +7,9 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "board.h"
-#include "movegen.h"
-#include "evaluate.h"
+#include "Board.h"
+#include "Evaluate.h"
+#include "Movegen.h"
 #include "Search.h"
 #include "Uci.h"
 

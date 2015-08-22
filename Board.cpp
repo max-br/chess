@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "bitfunc.h"
-#include "board.h"
+#include "Board.h"
 #include "directions.h"
 #include "magicmoves.h"
 
