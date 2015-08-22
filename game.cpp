@@ -20,9 +20,9 @@ int main()
 	Uci uci(&board, &search);
 
 	Test test;
-	test.perftTests();
+	//test.perftTests();
 
-	//uci.start();
+	uci.start();
 
 	return 0;
 }

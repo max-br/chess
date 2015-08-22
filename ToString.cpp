@@ -153,7 +153,6 @@ std::string ToString::moveNotation(Move m)
 
 	ret += squareNotation(extractFrom(m));
 	ret += squareNotation(extractTo(m));
-	ret += " ";
 
 	if(extractPromotion(m)){
 		if(extractPromotion(m) == BISHOP){
@@ -169,6 +168,9 @@ std::string ToString::moveNotation(Move m)
 			ret += 'q';
 		}
 	}
+
+	ret += " ";
+
 	return ret;
 }
 
