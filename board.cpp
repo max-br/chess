@@ -817,9 +817,28 @@ std::string Board::squareNotation(square sq)
 std::string Board::moveNotation(Move m)
 {
 	std::string ret;
+	if(m == NULLMOVE){
+		return "0000";
+	}
+
 	ret += squareNotation(extractFrom(m));
 	ret += squareNotation(extractTo(m));
 	ret += " ";
+
+	if(extractPromotion(m)){
+		if(extractPromotion(m) == BISHOP){
+			ret += 'b';
+		}
+		if(extractPromotion(m) == KNIGHT){
+			ret += 'k';
+		}
+		if(extractPromotion(m) == ROOK){
+			ret += 'r';
+		}
+		if(extractPromotion(m) == QUEEN){
+			ret += 'q';
+		}
+	}
 	return ret;
 }
 
