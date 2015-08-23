@@ -11,6 +11,15 @@
 
 using namespace std;
 
+
+// encodes a move
+inline Move encodeMove(const square& from, const square& to,
+		const Piece& piece, const Piece& capture = EMPTY, const Piece& promotion = EMPTY, const square& EP = 0, const Movetype& type = NONE)
+{
+	return encodeFrom(from) | encodeTo(to) | encodePiece(piece) | encodeCapture(capture) | encodePromotion(promotion) | encodeEP(EP) | encodeMovetype(type);
+}
+
+
 int main()
 {
 	Board board;
@@ -22,7 +31,7 @@ int main()
 	ToString tostring;
 	Test test;
 
-	//test.perftTests();
+	//test.profile();
 
 	uci.start();
 

@@ -32,18 +32,18 @@ typedef unsigned int Move;
 #define encodeFrom(X)       ((Move)X)
 #define encodeTo(X)         (((Move)X)<<6)
 #define encodePiece(X)      (((Move)X)<<12)
-#define encodeCapture(X)    (((Move)X)<<15)
-#define encodePromotion(X)  (((Move)X)<<18)
-#define encodeEP(X)         (((Move)X)<<21)
-#define encodeMovetype(X)   (((Move)X)<<27)
+#define encodePromotion(X)  (((Move)X)<<15)
+#define encodeEP(X)         (((Move)X)<<18)
+#define encodeMovetype(X)   (((Move)X)<<24)
+#define encodeCapture(X)    (((Move)X)<<27)
 
 #define extractFrom(m)		((m)&0x3F)
 #define extractTo(m)		(((m)>>6)&0x3F)
 #define extractPiece(m)     (((m)>>12)&7)
-#define extractCapture(m)	(((m)>>15)&7)
-#define extractPromotion(m) (((m)>>18)&7)
-#define extractEP(m)	    (((m)>>21)&0x3F)
-#define extractMovetype(m)	(((m)>>27)&7)
+#define extractPromotion(m) (((m)>>15)&7)
+#define extractEP(m)	    (((m)>>18)&0x3F)
+#define extractMovetype(m)	(((m)>>24)&7)
+#define extractCapture(m)	(((m)>>27)&7)
 
 
 enum Movetype{

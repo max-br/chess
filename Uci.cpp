@@ -79,7 +79,7 @@ void Uci::parseCommand(const string& cmd_string)
 		}
 		if(word == "go"){
 			command >> word;
-			int depth =6;
+			int depth = 8;
 			if(word == "depth"){
 				command >> depth;
 			}
