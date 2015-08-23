@@ -21,7 +21,6 @@ int main()
 
 	ToString tostring;
 	Test test;
-
 	//test.perftTests();
 
 	uci.start();

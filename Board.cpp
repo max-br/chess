@@ -715,6 +715,7 @@ void Board::setupFEN(const std::string fen){
 		}
 		++i;
 	}
+	inCheck = isInCheck(us);
 }
 
 void Board::switchColor(){
