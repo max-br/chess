@@ -17,6 +17,7 @@ int main()
 	Evaluate eval;
 	Movegen movegen = Movegen(&board);
 	Search search(&board, &eval, &movegen);
+	ToString tostring;
 	Uci uci(&board, &search);
 
 	Test test;
