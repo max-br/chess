@@ -5,7 +5,9 @@
  *      Author: max
  */
 
+#include <algorithm>
 #include <assert.h>
+#include <functional>
 #include <string.h>
 
 #include "Search.h"
@@ -51,6 +53,8 @@ int Search::alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr) {
     		return 0; //stalemate
     	}
     }
+    // sort movelist in descending order, captures are encoded in MSB, so they will be greater.
+    std::sort(list.moves,list.moves+list.count,std::greater<int>());
 
     for (int i = 0; i < list.count;++i)  {
     	// only consider legal moves
