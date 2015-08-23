@@ -20,10 +20,9 @@ public:
 	virtual ~Test();
 
 
+	std::vector<std::string> divide(Board& board,Movegen& movegen,int depth);
 	uint64_t perft(Board& board,Movegen& movegen, int depth);
 	uint64_t timePerft(Board& board,Movegen& movegen, int depth);
-
-	//std::vector<std::string> divide(Board& board,Movegen& movegen,int depth);
 
 	void profile();
 	void perftTests();

@@ -44,8 +44,10 @@ int Search::alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr) {
 
     if(list.count == 0){
     	if(board->inCheck){
+    		line_ptr->movecount = 0;
     		return -32000 + ply; //mate
     	}else {
+    		line_ptr->movecount = 0;
     		return 0; //stalemate
     	}
     }

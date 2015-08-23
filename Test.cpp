@@ -57,25 +57,25 @@ uint64_t Test::timePerft(Board& board, Movegen& movegen, int depth)
 	return nodes;
 }
 
-/*
-vector<string> Benchmark::divide(Board& board, Movegen& movegen,int depth)
+
+vector<string> Test::divide(Board& board, Movegen& movegen,int depth)
 {
-    Movelist movelist;
-    Stringer stringer = Stringer(board);
+    Movelist list;
+    ToString tostring;
 
     vector<string> ret;
-    movegen.genAllMoves(movelist);
+    movegen.genAllMoves(list);
     int perft_cnt = 0;
 
-    for (int i = 0; i < movelist.count; i++) {
+    for (int i = 0; i < list.count; i++) {
     	string movestring;
-    	board.makeMove(movelist.moves[i]);
+    	board.makeMove(list.moves[i]);
     	if(!board.isInCheck(board.them)){
     		int perft_tmp = perft(board,movegen,depth - 1);
     		perft_cnt += perft_tmp;
 
-    		movestring += board.moveNotation(movelist.moves[i]);
-    		movestring += to_string(perft_tmp);
+    		movestring += tostring.moveNotation(list.moves[i]);
+    		movestring += std::to_string(perft_tmp);
     		ret.push_back(movestring);
     		cout << movestring << endl;
     	}
@@ -83,7 +83,7 @@ vector<string> Benchmark::divide(Board& board, Movegen& movegen,int depth)
     }
     cout << "Move count: " << perft_cnt << endl;
     return ret;
-}*/
+}
 
 void Test::perftTests()
 {
