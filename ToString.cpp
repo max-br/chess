@@ -159,7 +159,7 @@ std::string ToString::moveNotation(Move m)
 			ret += 'b';
 		}
 		if(extractPromotion(m) == KNIGHT){
-			ret += 'k';
+			ret += 'n';
 		}
 		if(extractPromotion(m) == ROOK){
 			ret += 'r';
