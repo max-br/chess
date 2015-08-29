@@ -93,7 +93,7 @@ inline Move Movegen::encodeMove(const square& from, const square& to,
 void Movegen::genAllMoves(Movelist& list)
 {
 	pinned_pieces = pinnedPieces(board->us);
-	if(!board->inCheck){
+	if(!board->in_check){
 		if(board->us == WHITE){
 			genWhitePawnMoves(list);
 		}else{

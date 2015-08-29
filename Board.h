@@ -26,7 +26,7 @@ public:
 	Move castle_moves[4];
 
 	bool castling_rights[4];
-	bool inCheck;
+	bool in_check;
 	int fullmove_number, halfmove_number;
 
 	Color us,them;

@@ -21,6 +21,7 @@ public:
 	Evaluate* eval;
 	Movegen* movegen;
 
+
 	int alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr);
 	Move bestMove(int depth);
 };

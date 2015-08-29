@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <iostream>
 #include <functional>
 #include <string.h>
 
@@ -27,15 +28,11 @@ Search::~Search() {
 	// TODO Auto-generated destructor stub
 }
 
-int Search::alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr) {
+int Search::alphaBeta(int depth, int ply, int alpha, int beta) {
     Line line;
     Movelist list;
 
     assert(-INFINITE <= alpha && alpha < beta && beta <= INFINITE);
-
-    if(board->inCheck && depth == 0){
-    	depth++;
-    }
 
     if (depth == 0) {
     	line_ptr->movecount = 0;
@@ -45,9 +42,9 @@ int Search::alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr) {
     movegen->genAllMoves(list);
 
     if(list.count == 0){
-    	if(board->inCheck){
+    	if(board->in_check){
     		line_ptr->movecount = 0;
-    		return -32000 + ply; //mate
+    		return -32000 - ply; //mate
     	}else {
     		line_ptr->movecount = 0;
     		return 0; //stalemate
@@ -78,7 +75,7 @@ int Search::alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr) {
 
 Move Search::bestMove(int depth)
 {
-	Line line;
+	Movelist list;
 	alphaBeta(depth,0,-INFINITE,INFINITE,&line);
 	return line.moves[0];
 }

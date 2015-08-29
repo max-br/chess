@@ -264,7 +264,7 @@ bool Board::makeMove(const Move& move)
 		return false;
 	}
 
-	inCheck = isInCheck(them);
+	in_check = isInCheck(them);
 
 	updateCastlingRights(move, us);
 	switchColor();
@@ -715,7 +715,7 @@ void Board::setupFEN(const std::string fen){
 		}
 		++i;
 	}
-	inCheck = isInCheck(us);
+	in_check = isInCheck(us);
 }
 
 void Board::switchColor(){
