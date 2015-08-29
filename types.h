@@ -75,11 +75,6 @@ enum Castlingrights{
 	BQUEENSIDE
 };
 
-struct Line {
-    int movecount;              // Number of moves in the line.
-    Move moves[32];  			// The line.
-};
-
 struct Movelist{
 	int 	count = 0;
 	Move	moves[MAX_POSSIBLE_MOVES];

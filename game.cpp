@@ -31,15 +31,9 @@ int main()
 	ToString tostring;
 	Test test;
 
-	board.setupFEN("8/R4P2/4k3/7p/2K1N3/8/7P/8 w - - 0 44");
-	tostring.print(board);
-	Move best = search.bestMove(4);
-	tostring.printMove(best);
-	cout << tostring.moveNotation(best);
-
 //	test.perftTests();
 
-	//uci.start();
+	uci.start();
 
 	return 0;
 }

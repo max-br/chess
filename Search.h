@@ -22,7 +22,7 @@ public:
 	Movegen* movegen;
 
 
-	int alphaBeta(int depth, int ply, int alpha, int beta, Line* line_ptr);
+	int alphaBeta(int depth, int ply, int alpha, int beta);
 	Move bestMove(int depth);
 };
 

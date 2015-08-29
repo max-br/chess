@@ -16,6 +16,7 @@
 #include "Board.h"
 #include "Evaluate.h"
 #include "Movegen.h"
+#include "ToString.h"
 #include "types.h"
 
 Search::Search(Board* board,Evaluate* eval, Movegen* movegen){
@@ -29,13 +30,11 @@ Search::~Search() {
 }
 
 int Search::alphaBeta(int depth, int ply, int alpha, int beta) {
-    Line line;
     Movelist list;
 
     assert(-INFINITE <= alpha && alpha < beta && beta <= INFINITE);
 
     if (depth == 0) {
-    	line_ptr->movecount = 0;
         return eval->evaluatePos(board);
     }
 
@@ -43,27 +42,22 @@ int Search::alphaBeta(int depth, int ply, int alpha, int beta) {
 
     if(list.count == 0){
     	if(board->in_check){
-    		line_ptr->movecount = 0;
-    		return -32000 - ply; //mate
+    		return -32000 + ply; //mate
     	}else {
-    		line_ptr->movecount = 0;
     		return 0; //stalemate
     	}
     }
     // sort movelist in descending order, captures are encoded in MSB, so they will be greater.
     std::sort(list.moves,list.moves+list.count,std::greater<int>());
 
-    for (int i = 0; i < list.count;++i)  {
+    for (int i = 0; i < list.count;i++)  {
     	// only consider legal moves
     	if(board->makeMove(list.moves[i])){
-            int val = -alphaBeta(depth - 1, ply + 1, -beta, -alpha, &line);
+            int val = -alphaBeta(depth - 1, ply + 1, -beta, -alpha);
             board->unmakeMove();
             if (val >= beta) return beta;
             if (val > alpha) {
                 alpha = val;
-                line_ptr->moves[0] = list.moves[i];
-                memcpy(line_ptr->moves + 1, line.moves, line.movecount * sizeof(Move));
-                line_ptr->movecount = line.movecount + 1;
             }
     	}else{
     		board->unmakeMove();
@@ -75,7 +69,21 @@ int Search::alphaBeta(int depth, int ply, int alpha, int beta) {
 
 Move Search::bestMove(int depth)
 {
+	ToString tostring;
 	Movelist list;
-	alphaBeta(depth,0,-INFINITE,INFINITE,&line);
-	return line.moves[0];
+	Move best_move = NULLMOVE;
+	int max_score = -64000;
+	movegen->genAllMoves(list);
+	for(int i = 0; i < list.count; i++){
+		if(board->makeMove(list.moves[i])){
+			int score = -alphaBeta(depth - 1, 1, -INFINITE, INFINITE);
+			std::cout << score << " " << tostring.moveNotation(list.moves[i]) << std::endl;
+			if(score > max_score){
+				best_move = list.moves[i];
+				max_score = score;
+			}
+		}
+		board->unmakeMove();
+	}
+	return best_move;
 }
