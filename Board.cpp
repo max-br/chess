@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-#include "bitfunc.h"
 #include "Board.h"
+#include "bitfunc.h"
 #include "directions.h"
 #include "magicmoves.h"
 
@@ -734,60 +734,59 @@ void Board::switchColor() {
   them = tmp;
 }
 
-Move Board::stringToMove(std::string move){
-    char col = move[0] - 'a';
-    char row = move[1] - '0';
-    square from = (row-1) * 8 + col;
+Move Board::stringToMove(std::string move) {
+  char col = move[0] - 'a';
+  char row = move[1] - '0';
+  square from = (row - 1) * 8 + col;
 
-    col = move[2] - 'a';
-    row = move[3] - '0';
-    square to = (row-1) * 8 + col;
+  col = move[2] - 'a';
+  row = move[3] - '0';
+  square to = (row - 1) * 8 + col;
 
-    Piece promotion = EMPTY;
+  Piece promotion = EMPTY;
 
-    if(move.length() > 4){
-        char p = move[4];
-        switch(p) {
-        case 'q':
-            promotion = QUEEN;
-            break;
-        case 'n':
-            promotion = KNIGHT;
-            break;
-        case 'r':
-            promotion = ROOK;
-            break; bb
-        case 'b':
-            promotion = BISHOP;
-            break;
-        default:
-            promotion = EMPTY;
-            break;
-        }
+  if (move.length() > 4) {
+    char p = move[4];
+    switch (p) {
+    case 'q':
+      promotion = QUEEN;
+      break;
+    case 'n':
+      promotion = KNIGHT;
+      break;
+    case 'r':
+      promotion = ROOK;
+      break;
+    case 'b':
+      promotion = BISHOP;
+      break;
+    default:
+      promotion = EMPTY;
+      break;
     }
+  }
 
-    Movetype mt = NONE;
-    if(squares[from] == KING){
-        // TODO: MOVETYPE = CASTLE
-    }
+  Movetype mt = NONE;
+  if (squares[from] == KING) {
+    // TODO: MOVETYPE = CASTLE
+  }
 
+  bitboard EP = 0;
+  if (squares[from] == PAWN) {
+    // TODO: encodeEP
+  }
 
-    if(squares[from] == PAWN){
-        //TODO: encodeEP
-    }
-
-    return encodeFrom(from) | encodeTo(to) | encodePiece(squares[from]) |
-        encodeCapture(squares[to]) | encodePromotion(promotion) | encodeEP(EP) |
-        encodeMovetype(mt);
+  return encodeFrom(from) | encodeTo(to) | encodePiece(squares[from]) |
+         encodeCapture(squares[to]) | encodePromotion(promotion) |
+         encodeEP(EP) | encodeMovetype(mt);
 }
 
-bool Board::setupMoves(std::vector<std::string> moves)
-{
-    for(auto move : moves){
-        Move m = stringToMove(move);
-        if(!makeMove(m)){
-            return false;
-        }
+bool Board::setupMoves(std::vector<std::string> moves) {
+  for (auto move : moves) {
+    Move m = stringToMove(move);
+    if (!makeMove(m)) {
+      return false;
     }
-    return true;
+  }
+  return true;
 }
