@@ -38,6 +38,7 @@ void Uci::sendMove(const Move &move) {
   sendCommand(movestring);
 }
 
+
 void Uci::parseCommand(const string &cmd_string) {
   stringstream command;
   command << cmd_string;
@@ -50,9 +51,21 @@ void Uci::parseCommand(const string &cmd_string) {
       sendCommand("id author Max Breitenfeldt");
       sendCommand("uciok");
     }
-    if (token == "isready") {
-      sendCommand("readok");
+
+    if (token == "go") {
+        command >> token;
+        int depth = 7;
+        if (token == "depth") {
+            command >> depth;
+        }
+        Move bestmove = search->bestMove(depth);
+        sendMove(bestmove);
     }
+
+    if (token == "isready") {
+      sendCommand("readyok");
+    }
+
     if (token == "position") {
       command >> token;
       string fen;
@@ -70,72 +83,12 @@ void Uci::parseCommand(const string &cmd_string) {
           moves.push_back(token);
         }
       }
-      if (token == "go") {
-        command >> token;
-        int depth = 7;
-        if (token == "depth") {
-          command >> depth;
-        }
-        Move bestmove = search->bestMove(depth);
-        sendMove(bestmove);
-      }
-      if (token == "quit") {
-        return;
-      }
+      board->setupFEN(fen);
+      board->setupMoves(moves);
     }
   }
-  board->setupFEN(fen);
-  //board->setupMoves(moves);
   return;
 }
-
-// void Uci::parseCommand(const string& cmd_string)
-// {
-
-// 	stringstream command;
-// 	command << cmd_string;
-// 	string word;
-// 	while(command >> word)
-// 	{
-// 		if(word == "uci"){
-// 			sendCommand("Chess 0.1 by Max Breitenfeldt");
-// 			sendCommand("id name Chess 0.1");
-// 			sendCommand("id author Max Breitenfeldt");
-// 			sendCommand("uciok");
-// 		}
-// 		if(word == "isready"){
-// 			sendCommand("readyok");
-// 		}
-// 		if(word == "position"){
-// 			string next_word;
-// 			string fen;
-// 			while (command >> next_word){
-// 				if(next_word == "fen"){
-// 					command.get();
-// 					getline(command, fen);
-// 				}
-// 				if(next_word == "startpos"){
-// 					fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w
-// KQkq - 0 1";
-// 				}
-// 			}
-// 			board->setupFEN(fen);
-// 			tostring.print(board);
-// 		}
-// 		if(word == "go"){
-// 			command >> word;
-// 			int depth = 7;
-// 			if(word == "depth"){
-// 				command >> depth;
-// 			}
-// 			Move bestmove = search->bestMove(depth);
-// 			sendMove(bestmove);
-// 		}
-// 		if(word == "quit"){
-// 			return;
-// 		}
-// 	}
-// }
 
 void Uci::start() {
   while (1) {
