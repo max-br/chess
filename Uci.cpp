@@ -100,6 +100,5 @@ void Uci::start() {
     if (input == "quit") {
       break;
     }
-    usleep(100);
   }
 }
